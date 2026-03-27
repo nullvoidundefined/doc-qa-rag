@@ -1,0 +1,6 @@
+{
+  "framework": "nextjs",
+  "installCommand": "cd .. && pnpm install --filter doc-qa-rag-web",
+  "buildCommand": "cd .. && pnpm --filter doc-qa-rag-web build",
+  "outputDirectory": ".next"
+}
