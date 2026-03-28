@@ -1,3 +1,4 @@
+import http from "node:http";
 import { Worker } from "bullmq";
 import IORedis from "ioredis";
 
@@ -38,12 +39,19 @@ worker.on("error", (err) => {
   logger.error({ err }, "Worker error");
 });
 
+const healthServer = http.createServer((_req, res) => {
+  res.writeHead(200);
+  res.end("ok");
+});
+healthServer.listen(Number(process.env.PORT) || 3001);
+
 logger.info("Document processing worker started");
 
 async function shutdown(signal: string) {
   logger.info({ signal }, "Shutting down worker gracefully");
   await worker.close();
   await connection.quit();
+  healthServer.close();
   process.exit(0);
 }
 
