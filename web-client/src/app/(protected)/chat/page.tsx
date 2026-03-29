@@ -182,6 +182,7 @@ export default function ChatPage() {
                   <button
                     key={i}
                     className={styles.citationBadge}
+                    aria-label={`Citation ${match[1]}`}
                     onClick={() =>
                       setExpandedCitation(
                         expandedCitation === chunk.id ? null : chunk.id,
@@ -279,6 +280,7 @@ export default function ChatPage() {
           className={styles.chatInput}
           type='text'
           placeholder='Ask a question about your documents...'
+          aria-label='Ask a question about your documents'
           value={input}
           onChange={(e) => setInput(e.target.value)}
           disabled={streaming}

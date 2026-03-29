@@ -42,6 +42,7 @@ export default function LoginPage() {
           className={styles.input}
           type='email'
           placeholder='Email'
+          aria-label='Email'
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -50,6 +51,7 @@ export default function LoginPage() {
           className={styles.input}
           type='password'
           placeholder='Password'
+          aria-label='Password'
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required

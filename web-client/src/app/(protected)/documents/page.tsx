@@ -133,6 +133,7 @@ export default function DocumentsPage() {
           ref={fileInputRef}
           type='file'
           accept='.pdf,.txt,.md'
+          aria-label='Upload document'
           onChange={handleFileChange}
           hidden
         />

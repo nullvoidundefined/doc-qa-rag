@@ -45,6 +45,7 @@ export default function RegisterPage() {
             className={styles.input}
             type='text'
             placeholder='First name'
+            aria-label='First name'
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
             required
@@ -53,6 +54,7 @@ export default function RegisterPage() {
             className={styles.input}
             type='text'
             placeholder='Last name'
+            aria-label='Last name'
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
             required
@@ -62,6 +64,7 @@ export default function RegisterPage() {
           className={styles.input}
           type='email'
           placeholder='Email'
+          aria-label='Email'
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -70,6 +73,7 @@ export default function RegisterPage() {
           className={styles.input}
           type='password'
           placeholder='Password (min 8 characters)'
+          aria-label='Password (min 8 characters)'
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           minLength={8}
