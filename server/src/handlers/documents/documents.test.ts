@@ -33,6 +33,7 @@ vi.mock('app/utils/logs/logger.js', () => ({
   },
 }));
 
+import { ApiError } from 'app/utils/ApiError.js';
 import * as docsRepo from 'app/repositories/documents/documents.js';
 import * as r2Service from 'app/services/r2.service.js';
 import { documentProcessQueue } from 'app/config/queue.js';
@@ -107,15 +108,15 @@ describe('documents handler', () => {
       expect(res.status).toHaveBeenCalledWith(201);
     });
 
-    it('returns 400 when no file uploaded', async () => {
+    it('throws ApiError when no file uploaded', async () => {
       const req = mockReq({ file: undefined });
       const res = mockRes();
 
-      await uploadDocument(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        error: { message: 'No file uploaded' },
+      await expect(uploadDocument(req, res)).rejects.toThrow(ApiError);
+      await expect(uploadDocument(req, res)).rejects.toMatchObject({
+        statusCode: 400,
+        code: 'VALIDATION_ERROR',
+        message: 'No file uploaded',
       });
     });
 
@@ -130,13 +131,10 @@ describe('documents handler', () => {
       });
       const res = mockRes();
 
-      await uploadDocument(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        error: {
-          message: 'Unsupported file type. Upload PDF, TXT, or MD files.',
-        },
+      await expect(uploadDocument(req, res)).rejects.toThrow(ApiError);
+      await expect(uploadDocument(req, res)).rejects.toMatchObject({
+        statusCode: 400,
+        message: 'Unsupported file type. Upload PDF, TXT, or MD files.',
       });
     });
 
@@ -151,11 +149,10 @@ describe('documents handler', () => {
       });
       const res = mockRes();
 
-      await uploadDocument(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        error: { message: 'File too large. Maximum size is 10MB.' },
+      await expect(uploadDocument(req, res)).rejects.toThrow(ApiError);
+      await expect(uploadDocument(req, res)).rejects.toMatchObject({
+        statusCode: 400,
+        message: 'File too large. Maximum size is 10MB.',
       });
     });
 
@@ -228,24 +225,26 @@ describe('documents handler', () => {
       expect(res.json).toHaveBeenCalledWith({ document: doc });
     });
 
-    it('returns 404 when document not found', async () => {
+    it('throws ApiError.notFound when document not found', async () => {
       mockDocsRepo.getDocumentById.mockResolvedValue(null);
 
       const req = mockReq({ params: { id: 'doc-999' } });
       const res = mockRes();
 
-      await getDocument(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(404);
+      await expect(getDocument(req, res)).rejects.toMatchObject({
+        statusCode: 404,
+        code: 'NOT_FOUND',
+      });
     });
 
-    it('returns 400 when id is missing', async () => {
+    it('throws ApiError.badRequest when id is missing', async () => {
       const req = mockReq({ params: {} });
       const res = mockRes();
 
-      await getDocument(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(400);
+      await expect(getDocument(req, res)).rejects.toMatchObject({
+        statusCode: 400,
+        code: 'VALIDATION_ERROR',
+      });
     });
   });
 
@@ -266,15 +265,16 @@ describe('documents handler', () => {
       expect(res.status).toHaveBeenCalledWith(204);
     });
 
-    it('returns 404 when document not found', async () => {
+    it('throws ApiError.notFound when document not found', async () => {
       mockDocsRepo.getDocumentById.mockResolvedValue(null);
 
       const req = mockReq({ params: { id: 'doc-999' } });
       const res = mockRes();
 
-      await deleteDocument(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(404);
+      await expect(deleteDocument(req, res)).rejects.toMatchObject({
+        statusCode: 404,
+        code: 'NOT_FOUND',
+      });
     });
 
     it('still deletes document if R2 deletion fails', async () => {

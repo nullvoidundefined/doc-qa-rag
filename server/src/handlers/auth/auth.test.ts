@@ -23,6 +23,7 @@ vi.mock('app/utils/logs/logger.js', () => ({
   },
 }));
 
+import { ApiError } from 'app/utils/ApiError.js';
 import * as authRepo from 'app/repositories/auth/auth.js';
 import { register, login, logout, me } from './auth.js';
 
@@ -87,19 +88,18 @@ describe('auth handler', () => {
       );
     });
 
-    it('returns 400 for invalid input', async () => {
+    it('throws ApiError for invalid input', async () => {
       const req = mockReq({ body: { email: 'bad' } });
       const res = mockRes();
 
-      await register(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({ error: expect.any(Object) }),
-      );
+      await expect(register(req, res)).rejects.toThrow(ApiError);
+      await expect(register(req, res)).rejects.toMatchObject({
+        statusCode: 400,
+        code: 'VALIDATION_ERROR',
+      });
     });
 
-    it('returns 409 for duplicate email', async () => {
+    it('throws ApiError with CONFLICT for duplicate email', async () => {
       mockAuthRepo.createUserAndSession.mockRejectedValue({ code: '23505' });
 
       const req = mockReq({
@@ -112,11 +112,11 @@ describe('auth handler', () => {
       });
       const res = mockRes();
 
-      await register(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(409);
-      expect(res.json).toHaveBeenCalledWith({
-        error: { message: 'Email already registered' },
+      await expect(register(req, res)).rejects.toThrow(ApiError);
+      await expect(register(req, res)).rejects.toMatchObject({
+        statusCode: 409,
+        code: 'CONFLICT',
+        message: 'Email already registered',
       });
     });
   });
@@ -150,7 +150,7 @@ describe('auth handler', () => {
       );
     });
 
-    it('returns 401 for nonexistent email', async () => {
+    it('throws ApiError.unauthorized for nonexistent email', async () => {
       mockAuthRepo.findUserByEmail.mockResolvedValue(null);
 
       const req = mockReq({
@@ -158,15 +158,15 @@ describe('auth handler', () => {
       });
       const res = mockRes();
 
-      await login(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({
-        error: { message: 'Invalid email or password' },
+      await expect(login(req, res)).rejects.toThrow(ApiError);
+      await expect(login(req, res)).rejects.toMatchObject({
+        statusCode: 401,
+        code: 'UNAUTHORIZED',
+        message: 'Invalid email or password',
       });
     });
 
-    it('returns 401 for wrong password', async () => {
+    it('throws ApiError.unauthorized for wrong password', async () => {
       mockAuthRepo.findUserByEmail.mockResolvedValue({ id: 'user-1', password_hash: 'hash' } as any);
       mockAuthRepo.verifyPassword.mockResolvedValue(false);
 
@@ -175,18 +175,20 @@ describe('auth handler', () => {
       });
       const res = mockRes();
 
-      await login(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(401);
+      await expect(login(req, res)).rejects.toThrow(ApiError);
+      await expect(login(req, res)).rejects.toMatchObject({
+        statusCode: 401,
+      });
     });
 
-    it('returns 400 for invalid input', async () => {
+    it('throws ApiError.badRequest for invalid input', async () => {
       const req = mockReq({ body: {} });
       const res = mockRes();
 
-      await login(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(400);
+      await expect(login(req, res)).rejects.toThrow(ApiError);
+      await expect(login(req, res)).rejects.toMatchObject({
+        statusCode: 400,
+      });
     });
   });
 

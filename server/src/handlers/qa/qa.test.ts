@@ -33,6 +33,7 @@ vi.mock('app/utils/logs/logger.js', () => ({
   },
 }));
 
+import { ApiError } from 'app/utils/ApiError.js';
 import Anthropic from '@anthropic-ai/sdk';
 import * as convRepo from 'app/repositories/conversations/conversations.js';
 import * as embeddingService from 'app/services/embedding.service.js';
@@ -77,25 +78,26 @@ describe('qa handler', () => {
   });
 
   describe('streamQA', () => {
-    it('returns 400 when question is missing', async () => {
+    it('throws ApiError.badRequest when question is missing', async () => {
       const req = mockReq({ body: {} });
       const res = mockRes();
 
-      await streamQA(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        error: { message: 'Question is required' },
+      await expect(streamQA(req, res)).rejects.toThrow(ApiError);
+      await expect(streamQA(req, res)).rejects.toMatchObject({
+        statusCode: 400,
+        code: 'VALIDATION_ERROR',
+        message: 'Question is required',
       });
     });
 
-    it('returns 400 when question is empty string', async () => {
+    it('throws ApiError.badRequest when question is empty string', async () => {
       const req = mockReq({ body: { question: '   ' } });
       const res = mockRes();
 
-      await streamQA(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(400);
+      await expect(streamQA(req, res)).rejects.toThrow(ApiError);
+      await expect(streamQA(req, res)).rejects.toMatchObject({
+        statusCode: 400,
+      });
     });
 
     it('handles no relevant chunks found', async () => {

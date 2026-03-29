@@ -16,7 +16,7 @@ describe('notFoundHandler middleware', () => {
     const res = await request(app).get('/nonexistent');
 
     expect(res.status).toBe(404);
-    expect(res.body).toEqual({ error: { message: 'Not found' } });
+    expect(res.body).toEqual({ error: 'NOT_FOUND', message: 'Not found' });
   });
 
   it('does not intercept existing routes', async () => {

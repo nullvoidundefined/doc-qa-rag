@@ -1,5 +1,6 @@
 import { requireAuth } from 'app/middleware/requireAuth/requireAuth.js';
 import * as convRepo from 'app/repositories/conversations/conversations.js';
+import { ApiError } from 'app/utils/ApiError.js';
 import express from 'express';
 import type { Request, Response } from 'express';
 
@@ -15,14 +16,12 @@ conversationRouter.get('/', async (req: Request, res: Response) => {
 conversationRouter.get('/:id/messages', async (req: Request, res: Response) => {
   const id = req.params.id as string | undefined;
   if (!id) {
-    res.status(400).json({ error: { message: 'Conversation ID required' } });
-    return;
+    throw ApiError.badRequest('Conversation ID required');
   }
 
   const conversation = await convRepo.getConversation(id, req.user!.id);
   if (!conversation) {
-    res.status(404).json({ error: { message: 'Conversation not found' } });
-    return;
+    throw ApiError.notFound('Conversation not found');
   }
 
   const messages = await convRepo.getMessages(id);

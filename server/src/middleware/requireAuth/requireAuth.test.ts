@@ -19,6 +19,7 @@ vi.mock('app/utils/logs/logger.js', () => ({
 }));
 
 import * as authRepo from 'app/repositories/auth/auth.js';
+import { errorHandler } from 'app/middleware/errorHandler/errorHandler.js';
 import { loadSession, requireAuth } from './requireAuth.js';
 
 const mockGetSessionWithUser = vi.mocked(authRepo.getSessionWithUser);
@@ -35,6 +36,8 @@ function createApp() {
   app.get('/public', (_req, res) => {
     res.json({ ok: true });
   });
+
+  app.use(errorHandler);
 
   return app;
 }
@@ -97,13 +100,14 @@ describe('requireAuth middleware', () => {
   });
 
   describe('requireAuth', () => {
-    it('returns 401 with error message when not authenticated', async () => {
+    it('returns 401 with standardized error format when not authenticated', async () => {
       const app = createApp();
       const res = await request(app).get('/protected');
 
       expect(res.status).toBe(401);
       expect(res.body).toEqual({
-        error: { message: 'Authentication required' },
+        error: 'UNAUTHORIZED',
+        message: 'Authentication required',
       });
     });
 

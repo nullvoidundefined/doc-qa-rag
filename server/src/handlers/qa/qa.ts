@@ -3,6 +3,7 @@ import { QA_SYSTEM_PROMPT, buildContextPrompt } from 'app/prompts/qa-system.js';
 import * as convRepo from 'app/repositories/conversations/conversations.js';
 import * as embeddingService from 'app/services/embedding.service.js';
 import * as retrievalService from 'app/services/retrieval.service.js';
+import { ApiError } from 'app/utils/ApiError.js';
 import { logger } from 'app/utils/logs/logger.js';
 import type { Request, Response } from 'express';
 
@@ -16,13 +17,13 @@ export async function streamQA(req: Request, res: Response): Promise<void> {
     document_ids?: string[];
   };
 
+  // Pre-stream validation — throw ApiError (handled by global error handler)
   if (
     !question ||
     typeof question !== 'string' ||
     question.trim().length === 0
   ) {
-    res.status(400).json({ error: { message: 'Question is required' } });
-    return;
+    throw ApiError.badRequest('Question is required');
   }
 
   // Setup SSE
@@ -136,6 +137,7 @@ export async function streamQA(req: Request, res: Response): Promise<void> {
     );
     res.end();
   } catch (err) {
+    // Inline error handling for stream errors (headers already sent)
     if (abortController.signal.aborted) {
       logger.info('Q&A stream aborted by client');
       return;

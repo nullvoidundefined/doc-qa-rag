@@ -1,6 +1,7 @@
 import { documentProcessQueue } from 'app/config/queue.js';
 import * as docsRepo from 'app/repositories/documents/documents.js';
 import * as r2Service from 'app/services/r2.service.js';
+import { ApiError } from 'app/utils/ApiError.js';
 import { logger } from 'app/utils/logs/logger.js';
 import type { DocumentProcessJob } from 'doc-qa-rag-common';
 import type { Request, Response } from 'express';
@@ -13,8 +14,7 @@ export async function uploadDocument(
   const file = req.file;
 
   if (!file) {
-    res.status(400).json({ error: { message: 'No file uploaded' } });
-    return;
+    throw ApiError.badRequest('No file uploaded');
   }
 
   const allowedMimes = [
@@ -24,22 +24,14 @@ export async function uploadDocument(
     'text/x-markdown',
   ];
   if (!allowedMimes.includes(file.mimetype)) {
-    res
-      .status(400)
-      .json({
-        error: {
-          message: 'Unsupported file type. Upload PDF, TXT, or MD files.',
-        },
-      });
-    return;
+    throw ApiError.badRequest(
+      'Unsupported file type. Upload PDF, TXT, or MD files.',
+    );
   }
 
   const maxSize = 10 * 1024 * 1024; // 10MB
   if (file.size > maxSize) {
-    res
-      .status(400)
-      .json({ error: { message: 'File too large. Maximum size is 10MB.' } });
-    return;
+    throw ApiError.badRequest('File too large. Maximum size is 10MB.');
   }
 
   const r2Key = `documents/${user.id}/${crypto.randomUUID()}/${file.originalname}`;
@@ -92,14 +84,12 @@ export async function getDocument(req: Request, res: Response): Promise<void> {
   const user = req.user!;
   const id = req.params.id as string | undefined;
   if (!id) {
-    res.status(400).json({ error: { message: 'Document ID required' } });
-    return;
+    throw ApiError.badRequest('Document ID required');
   }
 
   const document = await docsRepo.getDocumentById(id, user.id);
   if (!document) {
-    res.status(404).json({ error: { message: 'Document not found' } });
-    return;
+    throw ApiError.notFound('Document not found');
   }
   res.json({ document });
 }
@@ -111,14 +101,12 @@ export async function deleteDocument(
   const user = req.user!;
   const id = req.params.id as string | undefined;
   if (!id) {
-    res.status(400).json({ error: { message: 'Document ID required' } });
-    return;
+    throw ApiError.badRequest('Document ID required');
   }
 
   const document = await docsRepo.getDocumentById(id, user.id);
   if (!document) {
-    res.status(404).json({ error: { message: 'Document not found' } });
-    return;
+    throw ApiError.notFound('Document not found');
   }
 
   try {
