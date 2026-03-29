@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { chunkText, type TextChunk } from './index.js';
+import { describe, expect, it } from 'vitest';
+
+import { chunkText } from './index.js';
 
 describe('chunkText', () => {
   describe('basic chunking', () => {
@@ -123,7 +124,8 @@ describe('chunkText', () => {
     it('respects custom separators', () => {
       // Each part is ~25 chars (~7 tokens), maxTokens=5 (20 chars)
       // With ||| as only separator, each part should become its own chunk
-      const text = 'aaaa bbbb cccc dddd|||eeee ffff gggg hhhh|||iiii jjjj kkkk llll';
+      const text =
+        'aaaa bbbb cccc dddd|||eeee ffff gggg hhhh|||iiii jjjj kkkk llll';
       const chunks = chunkText(text, {
         maxTokens: 5,
         separators: ['|||'],

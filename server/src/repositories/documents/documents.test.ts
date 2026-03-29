@@ -1,4 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import {
+  createDocument,
+  deleteDocument,
+  getDocumentById,
+  listDocuments,
+  updateDocumentStatus,
+} from './documents.js';
 
 const mockQuery = vi.fn();
 
@@ -15,14 +23,6 @@ vi.mock('app/utils/logs/logger.js', () => ({
     debug: vi.fn(),
   },
 }));
-
-import {
-  createDocument,
-  getDocumentById,
-  listDocuments,
-  updateDocumentStatus,
-  deleteDocument,
-} from './documents.js';
 
 describe('documents repository', () => {
   beforeEach(() => {
@@ -53,7 +53,13 @@ describe('documents repository', () => {
       expect(result).toEqual(mockDoc);
       expect(mockQuery).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO documents'),
-        ['user-1', 'test.pdf', 'documents/user-1/abc/test.pdf', 'application/pdf', 1024],
+        [
+          'user-1',
+          'test.pdf',
+          'documents/user-1/abc/test.pdf',
+          'application/pdf',
+          1024,
+        ],
         undefined,
       );
     });
@@ -139,10 +145,11 @@ describe('documents repository', () => {
       await updateDocumentStatus('doc-1', 'failed', {
         error: 'Processing failed',
       });
-      expect(mockQuery).toHaveBeenCalledWith(
-        expect.stringContaining('error'),
-        ['doc-1', 'failed', 'Processing failed'],
-      );
+      expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('error'), [
+        'doc-1',
+        'failed',
+        'Processing failed',
+      ]);
     });
   });
 
@@ -153,7 +160,9 @@ describe('documents repository', () => {
       const result = await deleteDocument('doc-1', 'user-1');
       expect(result).toBe(true);
       expect(mockQuery).toHaveBeenCalledWith(
-        expect.stringContaining('DELETE FROM documents WHERE id = $1 AND user_id = $2'),
+        expect.stringContaining(
+          'DELETE FROM documents WHERE id = $1 AND user_id = $2',
+        ),
         ['doc-1', 'user-1'],
       );
     });

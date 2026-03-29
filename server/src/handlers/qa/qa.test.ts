@@ -1,4 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import * as convRepo from 'app/repositories/conversations/conversations.js';
+import * as embeddingService from 'app/services/embedding.service.js';
+import * as retrievalService from 'app/services/retrieval.service.js';
+import { ApiError } from 'app/utils/ApiError.js';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { generateConversationTitle, streamQA } from './qa.js';
 
 const { mockMessagesCreate, mockMessagesStream } = vi.hoisted(() => ({
   mockMessagesCreate: vi.fn().mockResolvedValue({
@@ -40,12 +46,6 @@ vi.mock('app/utils/logs/logger.js', () => ({
     child: vi.fn().mockReturnThis(),
   },
 }));
-
-import { ApiError } from 'app/utils/ApiError.js';
-import * as convRepo from 'app/repositories/conversations/conversations.js';
-import * as embeddingService from 'app/services/embedding.service.js';
-import * as retrievalService from 'app/services/retrieval.service.js';
-import { streamQA, generateConversationTitle } from './qa.js';
 
 const mockConvRepo = vi.mocked(convRepo);
 const mockEmbedding = vi.mocked(embeddingService);
@@ -131,9 +131,12 @@ describe('qa handler', () => {
 
       await streamQA(req, res);
 
-      expect(res.writeHead).toHaveBeenCalledWith(200, expect.objectContaining({
-        'Content-Type': 'text/event-stream',
-      }));
+      expect(res.writeHead).toHaveBeenCalledWith(
+        200,
+        expect.objectContaining({
+          'Content-Type': 'text/event-stream',
+        }),
+      );
 
       const written = res._written.join('');
       expect(written).toContain("don't have any documents");
@@ -169,7 +172,11 @@ describe('qa handler', () => {
       ]);
 
       const mockStreamObj = {
-        on: vi.fn().mockImplementation(function (this: any, event: string, cb: Function) {
+        on: vi.fn().mockImplementation(function (
+          this: any,
+          event: string,
+          cb: (text: string) => void,
+        ) {
           if (event === 'text') {
             cb('Answer text [1]');
           }
@@ -186,9 +193,12 @@ describe('qa handler', () => {
 
       await streamQA(req, res);
 
-      expect(res.writeHead).toHaveBeenCalledWith(200, expect.objectContaining({
-        'Content-Type': 'text/event-stream',
-      }));
+      expect(res.writeHead).toHaveBeenCalledWith(
+        200,
+        expect.objectContaining({
+          'Content-Type': 'text/event-stream',
+        }),
+      );
       const written = res._written.join('');
       expect(written).toContain('"type":"citations"');
     });
@@ -305,10 +315,14 @@ describe('qa handler', () => {
   describe('generateConversationTitle', () => {
     it('calls Anthropic with haiku model and returns generated title', async () => {
       mockMessagesCreate.mockResolvedValueOnce({
-        content: [{ type: 'text', text: 'Understanding Machine Learning Basics' }],
+        content: [
+          { type: 'text', text: 'Understanding Machine Learning Basics' },
+        ],
       });
 
-      const title = await generateConversationTitle('What is machine learning?');
+      const title = await generateConversationTitle(
+        'What is machine learning?',
+      );
 
       expect(title).toBe('Understanding Machine Learning Basics');
       expect(mockMessagesCreate).toHaveBeenCalledWith(
@@ -320,11 +334,11 @@ describe('qa handler', () => {
     });
 
     it('falls back to truncated question when API call fails', async () => {
-      mockMessagesCreate.mockRejectedValueOnce(
-        new Error('API rate limit'),
-      );
+      mockMessagesCreate.mockRejectedValueOnce(new Error('API rate limit'));
 
-      const title = await generateConversationTitle('What is the meaning of life?');
+      const title = await generateConversationTitle(
+        'What is the meaning of life?',
+      );
 
       expect(title).toBe('What is the meaning of life?');
     });

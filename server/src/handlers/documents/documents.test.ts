@@ -1,4 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { documentProcessQueue } from 'app/config/queue.js';
+import * as docsRepo from 'app/repositories/documents/documents.js';
+import * as r2Service from 'app/services/r2.service.js';
+import { ApiError } from 'app/utils/ApiError.js';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import {
+  deleteDocument,
+  getDocument,
+  listDocuments,
+  uploadDocument,
+} from './documents.js';
 
 vi.mock('app/repositories/documents/documents.js', () => ({
   createDocument: vi.fn(),
@@ -32,17 +43,6 @@ vi.mock('app/utils/logs/logger.js', () => ({
     child: vi.fn().mockReturnThis(),
   },
 }));
-
-import { ApiError } from 'app/utils/ApiError.js';
-import * as docsRepo from 'app/repositories/documents/documents.js';
-import * as r2Service from 'app/services/r2.service.js';
-import { documentProcessQueue } from 'app/config/queue.js';
-import {
-  uploadDocument,
-  listDocuments,
-  getDocument,
-  deleteDocument,
-} from './documents.js';
 
 const mockDocsRepo = vi.mocked(docsRepo);
 const mockR2 = vi.mocked(r2Service);
@@ -261,7 +261,10 @@ describe('documents handler', () => {
       await deleteDocument(req, res);
 
       expect(mockR2.deleteFile).toHaveBeenCalledWith('some/key.pdf');
-      expect(mockDocsRepo.deleteDocument).toHaveBeenCalledWith('doc-1', 'user-1');
+      expect(mockDocsRepo.deleteDocument).toHaveBeenCalledWith(
+        'doc-1',
+        'user-1',
+      );
       expect(res.status).toHaveBeenCalledWith(204);
     });
 

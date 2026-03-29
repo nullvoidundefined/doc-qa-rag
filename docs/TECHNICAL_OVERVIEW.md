@@ -48,18 +48,18 @@ flowchart TB
 
 ## Tech Stack
 
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| Frontend | Next.js 15 + React 19 | App router, SSR, client components |
-| API | Express + TypeScript | REST endpoints, SSE streaming |
-| Worker | BullMQ | Background document processing |
-| Database | Neon PostgreSQL + pgvector | Relational data + vector similarity search |
-| File Storage | Cloudflare R2 | S3-compatible document storage |
-| Queue | Railway Redis | Job queue for BullMQ |
-| Auth | Custom session-based | Cookie + bcrypt password hashing |
-| LLM | Anthropic Claude API | Completion generation |
-| Embeddings | Voyage AI | Vector embedding generation |
-| Styling | SCSS Modules | Scoped component styles |
+| Layer        | Technology                 | Purpose                                    |
+| ------------ | -------------------------- | ------------------------------------------ |
+| Frontend     | Next.js 15 + React 19      | App router, SSR, client components         |
+| API          | Express + TypeScript       | REST endpoints, SSE streaming              |
+| Worker       | BullMQ                     | Background document processing             |
+| Database     | Neon PostgreSQL + pgvector | Relational data + vector similarity search |
+| File Storage | Cloudflare R2              | S3-compatible document storage             |
+| Queue        | Railway Redis              | Job queue for BullMQ                       |
+| Auth         | Custom session-based       | Cookie + bcrypt password hashing           |
+| LLM          | Anthropic Claude API       | Completion generation                      |
+| Embeddings   | Voyage AI                  | Vector embedding generation                |
+| Styling      | SCSS Modules               | Scoped component styles                    |
 
 ## Monorepo Structure
 
@@ -165,26 +165,26 @@ CREATE TABLE messages (
 
 ### Authentication
 
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/auth/register` | Create account (email, password, first_name, last_name) |
-| POST | `/auth/login` | Log in, sets session cookie |
-| POST | `/auth/logout` | Log out, clears session |
-| GET | `/auth/me` | Get current user |
+| Method | Path             | Description                                             |
+| ------ | ---------------- | ------------------------------------------------------- |
+| POST   | `/auth/register` | Create account (email, password, first_name, last_name) |
+| POST   | `/auth/login`    | Log in, sets session cookie                             |
+| POST   | `/auth/logout`   | Log out, clears session                                 |
+| GET    | `/auth/me`       | Get current user                                        |
 
 ### Documents
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/documents` | List user's documents |
-| POST | `/documents` | Upload a document (multipart form) |
-| DELETE | `/documents/:id` | Delete a document and its chunks |
+| Method | Path             | Description                        |
+| ------ | ---------------- | ---------------------------------- |
+| GET    | `/documents`     | List user's documents              |
+| POST   | `/documents`     | Upload a document (multipart form) |
+| DELETE | `/documents/:id` | Delete a document and its chunks   |
 
 ### Q&A
 
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/qa` | Ask a question (SSE streaming response) |
+| Method | Path  | Description                             |
+| ------ | ----- | --------------------------------------- |
+| POST   | `/qa` | Ask a question (SSE streaming response) |
 
 **POST /qa** request body:
 
@@ -196,6 +196,7 @@ CREATE TABLE messages (
 ```
 
 SSE event types:
+
 - `token` — streamed answer token
 - `citations` — array of cited chunks with document metadata
 - `done` — stream complete, includes `conversation_id`

@@ -3,10 +3,9 @@
 import { useCallback, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 
-import Link from 'next/link';
-
 import { useAuth } from '@/context/AuthContext';
 import { API_BASE } from '@/lib/api';
+import Link from 'next/link';
 
 import styles from './chat.module.scss';
 

@@ -206,6 +206,7 @@ Cosine similarity measures the angle between two vectors, ignoring magnitude. Te
 <summary>Answer</summary>
 
 The `common` package contains code shared between server, worker, and potentially the frontend:
+
 - **Types** (`./types`): Document, Chunk, Conversation, Message, QAStreamEvent, DocumentProcessJob, CitedChunk
 - **Chunker** (`./chunker`): The `chunkText()` function — a recursive text splitter that's reusable in apps 5 and 7
 
@@ -236,6 +237,7 @@ document-qa-rag/
 ```
 
 pnpm workspaces enable:
+
 - **Shared dependencies** — deduplicated in a single node_modules
 - **Cross-package imports** — `workspace:*` protocol for internal deps
 - **Independent builds** — each package has its own tsconfig and build script
@@ -253,6 +255,7 @@ pnpm workspaces enable:
 <summary>Answer</summary>
 
 Each Dockerfile has two stages:
+
 1. **`base`** — Installs all dependencies (including devDependencies), builds common + target package
 2. **`production`** — Installs only production dependencies, copies built artifacts from base
 
@@ -266,6 +269,7 @@ This reduces the final image size by excluding TypeScript, build tools, and devD
 <summary>Answer</summary>
 
 BullMQ handles this automatically:
+
 - The job remains in the queue with "active" status
 - After the worker restarts, BullMQ's stalled job detection picks it up
 - The job retries up to 3 times with exponential backoff
@@ -304,12 +308,14 @@ node-pg-migrate wraps default values in its own quoting. If you write `default: 
 <summary>Answer</summary>
 
 **pgvector advantages:**
+
 - Single database for all data — simpler ops, transactional consistency
 - No additional service to manage/pay for
 - Neon supports it natively
 - SQL joins between chunks and documents/users
 
 **pgvector disadvantages:**
+
 - Slower at very large scale (millions of vectors) compared to purpose-built DBs like Pinecone/Weaviate
 - HNSW index build time grows with dataset size
 - No built-in sharding or distributed search

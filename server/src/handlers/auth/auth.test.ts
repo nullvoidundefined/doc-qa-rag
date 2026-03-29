@@ -1,4 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import * as authRepo from 'app/repositories/auth/auth.js';
+import { ApiError } from 'app/utils/ApiError.js';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { login, logout, me, register } from './auth.js';
 
 vi.mock('app/repositories/auth/auth.js', () => ({
   createUserAndSession: vi.fn(),
@@ -22,10 +26,6 @@ vi.mock('app/utils/logs/logger.js', () => ({
     child: vi.fn().mockReturnThis(),
   },
 }));
-
-import { ApiError } from 'app/utils/ApiError.js';
-import * as authRepo from 'app/repositories/auth/auth.js';
-import { register, login, logout, me } from './auth.js';
 
 const mockAuthRepo = vi.mocked(authRepo);
 
@@ -80,7 +80,11 @@ describe('auth handler', () => {
       await register(req, res);
 
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.cookie).toHaveBeenCalledWith('sid', 'session-123', expect.any(Object));
+      expect(res.cookie).toHaveBeenCalledWith(
+        'sid',
+        'session-123',
+        expect.any(Object),
+      );
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           user: expect.objectContaining({ id: 'user-1' }),
@@ -142,7 +146,11 @@ describe('auth handler', () => {
 
       await login(req, res);
 
-      expect(res.cookie).toHaveBeenCalledWith('sid', 'session-456', expect.any(Object));
+      expect(res.cookie).toHaveBeenCalledWith(
+        'sid',
+        'session-456',
+        expect.any(Object),
+      );
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           user: expect.objectContaining({ id: 'user-1' }),
@@ -167,7 +175,10 @@ describe('auth handler', () => {
     });
 
     it('throws ApiError.unauthorized for wrong password', async () => {
-      mockAuthRepo.findUserByEmail.mockResolvedValue({ id: 'user-1', password_hash: 'hash' } as any);
+      mockAuthRepo.findUserByEmail.mockResolvedValue({
+        id: 'user-1',
+        password_hash: 'hash',
+      } as any);
       mockAuthRepo.verifyPassword.mockResolvedValue(false);
 
       const req = mockReq({

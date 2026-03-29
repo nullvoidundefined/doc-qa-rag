@@ -60,7 +60,6 @@ export async function updateConversationTitle(
   );
 }
 
-
 export async function getMessages(conversationId: string): Promise<Message[]> {
   const result = await query<Message>(
     'SELECT * FROM messages WHERE conversation_id = $1 ORDER BY created_at ASC',

@@ -64,7 +64,9 @@ app.use((req, res, next) => {
   req.setTimeout(timeout);
   res.setTimeout(timeout, () => {
     if (!res.headersSent) {
-      res.status(408).json({ error: 'REQUEST_TIMEOUT', message: 'Request timeout' });
+      res
+        .status(408)
+        .json({ error: 'REQUEST_TIMEOUT', message: 'Request timeout' });
     }
   });
 

@@ -2,10 +2,7 @@ import { SESSION_COOKIE_NAME } from 'app/constants/session.js';
 import { doubleCsrf } from 'csrf-csrf';
 import type { Request } from 'express';
 
-const {
-  doubleCsrfProtection,
-  generateCsrfToken,
-} = doubleCsrf({
+const { doubleCsrfProtection, generateCsrfToken } = doubleCsrf({
   getSecret: () => process.env.CSRF_SECRET!,
   getSessionIdentifier: (req: Request) =>
     req.cookies?.[SESSION_COOKIE_NAME] ?? '',

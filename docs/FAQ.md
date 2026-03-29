@@ -27,6 +27,7 @@ pnpm --filter doc-qa-rag-web run dev       # Frontend on :3000
 ### What environment variables do I need?
 
 **Server (.env in server/):**
+
 ```
 DATABASE_URL=postgresql://user:pass@host/db?sslmode=require
 REDIS_URL=redis://default:pass@host:6379
@@ -41,6 +42,7 @@ SESSION_SECRET=any-random-string
 ```
 
 **Worker (.env in worker/):**
+
 ```
 DATABASE_URL=postgresql://user:pass@host/db?sslmode=require
 REDIS_URL=redis://default:pass@host:6379
@@ -52,6 +54,7 @@ OPENAI_API_KEY=sk-...
 ```
 
 **Web Client (.env.local in web-client/):**
+
 ```
 NEXT_PUBLIC_API_URL=http://localhost:3001
 ```
@@ -128,11 +131,13 @@ This preserves natural document structure — paragraphs stay intact when possib
 ### Why is there a separate worker process?
 
 Document processing involves:
+
 - Downloading files from R2
 - CPU-intensive text extraction (especially PDFs)
 - Multiple API calls for embedding (potentially hundreds of chunks)
 
 This can take seconds to minutes. Running it in the API process would block HTTP requests. The worker runs independently, with BullMQ providing:
+
 - Job queuing and persistence
 - Automatic retries (3 attempts, exponential backoff)
 - Concurrency control (2 concurrent jobs)
@@ -179,14 +184,14 @@ Custom session-based auth (no Supabase Auth in this app):
 
 ### Where is everything deployed?
 
-| Component | Platform | URL/Details |
-|-----------|----------|-------------|
-| Frontend | Vercel | `doc-qa-rag-web.vercel.app` |
-| API Server | Railway | Docker container from `Dockerfile.server` |
-| Worker | Railway | Docker container from `Dockerfile.worker` |
-| Database | Neon | PostgreSQL + pgvector |
-| File Storage | Cloudflare R2 | S3-compatible bucket |
-| Queue | Railway Redis | BullMQ job queue |
+| Component    | Platform      | URL/Details                               |
+| ------------ | ------------- | ----------------------------------------- |
+| Frontend     | Vercel        | `doc-qa-rag-web.vercel.app`               |
+| API Server   | Railway       | Docker container from `Dockerfile.server` |
+| Worker       | Railway       | Docker container from `Dockerfile.worker` |
+| Database     | Neon          | PostgreSQL + pgvector                     |
+| File Storage | Cloudflare R2 | S3-compatible bucket                      |
+| Queue        | Railway Redis | BullMQ job queue                          |
 
 ### How do I deploy changes?
 

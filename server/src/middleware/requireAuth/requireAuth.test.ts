@@ -1,7 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import express from 'express';
+import { errorHandler } from 'app/middleware/errorHandler/errorHandler.js';
+import * as authRepo from 'app/repositories/auth/auth.js';
 import cookieParser from 'cookie-parser';
+import express from 'express';
 import request from 'supertest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { loadSession, requireAuth } from './requireAuth.js';
 
 vi.mock('app/repositories/auth/auth.js', () => ({
   getSessionWithUser: vi.fn(),
@@ -17,10 +21,6 @@ vi.mock('app/utils/logs/logger.js', () => ({
     child: vi.fn().mockReturnThis(),
   },
 }));
-
-import * as authRepo from 'app/repositories/auth/auth.js';
-import { errorHandler } from 'app/middleware/errorHandler/errorHandler.js';
-import { loadSession, requireAuth } from './requireAuth.js';
 
 const mockGetSessionWithUser = vi.mocked(authRepo.getSessionWithUser);
 
