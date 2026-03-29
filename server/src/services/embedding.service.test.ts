@@ -1,4 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { generateEmbedding, generateEmbeddings } from './embedding.service.js';
 
 vi.mock('app/utils/logs/logger.js', () => ({
   logger: {
@@ -11,8 +13,6 @@ vi.mock('app/utils/logs/logger.js', () => ({
 
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
-
-import { generateEmbedding, generateEmbeddings } from './embedding.service.js';
 
 describe('embedding service', () => {
   beforeEach(() => {

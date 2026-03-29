@@ -17,6 +17,18 @@
     "prepare": "git rev-parse --git-dir > /dev/null 2>&1 && lefthook install || true"
   },
   "devDependencies": {
-    "lefthook": "^2.1.1"
+    "@babel/eslint-parser": "^7.28.6",
+    "@typescript-eslint/parser": "^8.56.1",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-security": "^3.0.0",
+    "eslint-plugin-unused-imports": "^4.1.4",
+    "globals": "^17.4.0",
+    "lefthook": "^2.1.1",
+    "prettier": "^3.8.1",
+    "typescript-eslint": "^8.56.1"
   }
 }

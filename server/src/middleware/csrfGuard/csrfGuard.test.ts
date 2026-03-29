@@ -1,8 +1,8 @@
-import { doubleCsrf } from 'csrf-csrf';
 import cookieParser from 'cookie-parser';
+import { doubleCsrf } from 'csrf-csrf';
 import express from 'express';
 import request from 'supertest';
-import { describe, it, expect, beforeAll } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 
 const TEST_SECRET = 'test-csrf-secret-value';
 
@@ -60,9 +60,7 @@ describe('CSRF protection', () => {
   });
 
   it('POST without CSRF token returns 403', async () => {
-    const res = await request(app)
-      .post('/test')
-      .send({ data: 'hello' });
+    const res = await request(app).post('/test').send({ data: 'hello' });
     expect(res.status).toBe(403);
   });
 

@@ -9,17 +9,17 @@ Upload PDFs and documents. A background pipeline chunks them, generates embeddin
 
 ## Hosting & Infrastructure
 
-| Service | Provider | Notes |
-|---------|----------|-------|
-| Frontend | Vercel | Next.js |
-| API Server | Railway | Express + TypeScript |
-| Worker | Railway | BullMQ document processing worker |
-| Database | Neon | PostgreSQL + pgvector extension |
-| File Storage | Cloudflare R2 | S3-compatible, free egress |
-| Queue | Railway Redis | BullMQ |
-| Auth | Custom session-based | Same pattern |
-| LLM | Anthropic Claude API | Completions + embeddings |
-| Embeddings | Voyage AI or OpenAI | Dedicated embedding model |
+| Service      | Provider             | Notes                             |
+| ------------ | -------------------- | --------------------------------- |
+| Frontend     | Vercel               | Next.js                           |
+| API Server   | Railway              | Express + TypeScript              |
+| Worker       | Railway              | BullMQ document processing worker |
+| Database     | Neon                 | PostgreSQL + pgvector extension   |
+| File Storage | Cloudflare R2        | S3-compatible, free egress        |
+| Queue        | Railway Redis        | BullMQ                            |
+| Auth         | Custom session-based | Same pattern                      |
+| LLM          | Anthropic Claude API | Completions + embeddings          |
+| Embeddings   | Voyage AI or OpenAI  | Dedicated embedding model         |
 
 **Neon + pgvector:** Neon supports the pgvector extension natively. Enable it with `CREATE EXTENSION vector;`. No separate vector DB needed for this scale.
 

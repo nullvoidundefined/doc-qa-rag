@@ -11,7 +11,7 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config([
   {
-    ignores: ['build', 'dist', 'node_modules', '**/*.d.ts', '.turbo'],
+    ignores: ['build', 'dist', 'node_modules', '**/*.d.ts', '.turbo', '.next', 'web-client/.next', '**/vitest.config.ts', '**/*.config.ts', '**/dist/**', '**/build/**'],
   },
   {
     linterOptions: {
@@ -23,7 +23,7 @@ export default tseslint.config([
       'unused-imports': unusedImports,
     },
     rules: {
-      'curly': 'error',
+      curly: 'error',
       'no-console': ['warn', { allow: ['warn', 'info', 'error', 'group'] }],
       'no-implicit-globals': 'error',
       'no-param-reassign': ['error', { props: false }],
@@ -75,12 +75,15 @@ export default tseslint.config([
       parserOptions: {
         ecmaFeatures: { jsx: true },
         ecmaVersion: 'latest',
-        project: ['./tsconfig.json'],
+        project: ['./server/tsconfig.json', './web-client/tsconfig.json', './worker/tsconfig.json', './common/tsconfig.json'],
         sourceType: 'module',
       },
     },
     rules: {
-      '@typescript-eslint/ban-ts-comment': ['warn', { 'ts-ignore': 'allow-with-description' }],
+      '@typescript-eslint/ban-ts-comment': [
+        'warn',
+        { 'ts-ignore': 'allow-with-description' },
+      ],
       '@typescript-eslint/consistent-type-definitions': 'off',
       '@typescript-eslint/consistent-type-imports': [
         'warn',

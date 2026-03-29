@@ -1,11 +1,20 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import bcrypt from 'bcrypt';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import {
+  createUser,
+  deleteSession,
+  findUserByEmail,
+  getSessionWithUser,
+  verifyPassword,
+} from './auth.js';
 
 const mockQuery = vi.fn();
 const mockWithTransaction = vi.fn();
 
 vi.mock('app/db/pool/pool.js', () => ({
   query: (...args: unknown[]) => mockQuery(...args),
-  withTransaction: (fn: Function) => mockWithTransaction(fn),
+  withTransaction: (fn: (client: unknown) => Promise<unknown>) => mockWithTransaction(fn),
   default: { query: vi.fn(), end: vi.fn(), on: vi.fn() },
 }));
 
@@ -25,15 +34,6 @@ vi.mock('bcrypt', () => ({
   },
 }));
 
-import bcrypt from 'bcrypt';
-import {
-  createUser,
-  findUserByEmail,
-  verifyPassword,
-  getSessionWithUser,
-  deleteSession,
-} from './auth.js';
-
 const mockBcrypt = vi.mocked(bcrypt);
 
 describe('auth repository', () => {
@@ -51,7 +51,12 @@ describe('auth repository', () => {
       };
       mockQuery.mockResolvedValue({ rows: [mockUser] });
 
-      const result = await createUser('Test@Test.com', 'password123', 'Test', 'User');
+      const result = await createUser(
+        'Test@Test.com',
+        'password123',
+        'Test',
+        'User',
+      );
 
       expect(mockBcrypt.hash).toHaveBeenCalledWith('password123', 12);
       expect(mockQuery).toHaveBeenCalledWith(
@@ -77,7 +82,11 @@ describe('auth repository', () => {
 
   describe('findUserByEmail', () => {
     it('returns user when found', async () => {
-      const mockUser = { id: 'user-1', email: 'test@test.com', password_hash: 'hash' };
+      const mockUser = {
+        id: 'user-1',
+        email: 'test@test.com',
+        password_hash: 'hash',
+      };
       mockQuery.mockResolvedValue({ rows: [mockUser] });
 
       const result = await findUserByEmail('test@test.com');

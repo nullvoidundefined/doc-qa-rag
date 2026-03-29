@@ -1,22 +1,25 @@
 'use client';
 
 import type { ComponentPropsWithoutRef } from 'react';
+
 import dynamic from 'next/dynamic';
 import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import sql from 'react-syntax-highlighter/dist/esm/languages/prism/sql';
-import typescript from 'react-syntax-highlighter/dist/esm/languages/prism/typescript';
 import bash from 'react-syntax-highlighter/dist/esm/languages/prism/bash';
 import json from 'react-syntax-highlighter/dist/esm/languages/prism/json';
+import sql from 'react-syntax-highlighter/dist/esm/languages/prism/sql';
+import typescript from 'react-syntax-highlighter/dist/esm/languages/prism/typescript';
+import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import remarkGfm from 'remark-gfm';
 
 SyntaxHighlighter.registerLanguage('sql', sql);
 SyntaxHighlighter.registerLanguage('typescript', typescript);
 SyntaxHighlighter.registerLanguage('bash', bash);
 SyntaxHighlighter.registerLanguage('json', json);
 
-const MermaidDiagram = dynamic(() => import('./MermaidDiagram'), { ssr: false });
+const MermaidDiagram = dynamic(() => import('./MermaidDiagram'), {
+  ssr: false,
+});
 
 function headingId(children: React.ReactNode): string {
   return String(children)

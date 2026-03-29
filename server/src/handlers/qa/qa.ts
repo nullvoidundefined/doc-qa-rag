@@ -9,7 +9,6 @@ import type { Request, Response } from 'express';
 
 const anthropic = new Anthropic();
 
-
 export async function generateConversationTitle(
   question: string,
 ): Promise<string> {
@@ -80,11 +79,9 @@ export async function streamQA(req: Request, res: Response): Promise<void> {
     // 2b. Generate AI title for new conversations (fire-and-forget)
     if (isNewConversation) {
       const convId = conversationId;
-      generateConversationTitle(question).then((title) =>
-        convRepo.updateConversationTitle(convId, title),
-      ).catch((err) =>
-        logger.warn({ err }, 'Async title update failed'),
-      );
+      generateConversationTitle(question)
+        .then((title) => convRepo.updateConversationTitle(convId, title))
+        .catch((err) => logger.warn({ err }, 'Async title update failed'));
     }
 
     // 3. Embed the question

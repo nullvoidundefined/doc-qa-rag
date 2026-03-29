@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest';
-import { QA_SYSTEM_PROMPT, buildContextPrompt } from './qa-system.js';
 import type { CitedChunk } from 'doc-qa-rag-common';
+import { describe, expect, it } from 'vitest';
+
+import { QA_SYSTEM_PROMPT, buildContextPrompt } from './qa-system.js';
 
 describe('qa-system prompts', () => {
   describe('QA_SYSTEM_PROMPT', () => {

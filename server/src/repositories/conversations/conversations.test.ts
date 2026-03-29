@@ -1,4 +1,13 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import {
+  createConversation,
+  createMessage,
+  getConversation,
+  getMessages,
+  listConversations,
+  updateConversationTitle,
+} from './conversations.js';
 
 const mockQuery = vi.fn();
 
@@ -15,15 +24,6 @@ vi.mock('app/utils/logs/logger.js', () => ({
     debug: vi.fn(),
   },
 }));
-
-import {
-  createConversation,
-  getConversation,
-  listConversations,
-  createMessage,
-  getMessages,
-  updateConversationTitle,
-} from './conversations.js';
 
 describe('conversations repository', () => {
   beforeEach(() => {

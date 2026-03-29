@@ -1,4 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { deleteFile, getSignedDownloadUrl, uploadFile } from './r2.service.js';
 
 const mockSend = vi.fn();
 const mockGetSignedUrl = vi.fn();
@@ -8,17 +10,21 @@ vi.mock('@aws-sdk/client-s3', () => {
     S3Client: vi.fn().mockImplementation(() => ({
       send: (...args: unknown[]) => mockSend(...args),
     })),
-    PutObjectCommand: vi.fn().mockImplementation((input) => ({ _type: 'Put', input })),
-    GetObjectCommand: vi.fn().mockImplementation((input) => ({ _type: 'Get', input })),
-    DeleteObjectCommand: vi.fn().mockImplementation((input) => ({ _type: 'Delete', input })),
+    PutObjectCommand: vi
+      .fn()
+      .mockImplementation((input) => ({ _type: 'Put', input })),
+    GetObjectCommand: vi
+      .fn()
+      .mockImplementation((input) => ({ _type: 'Get', input })),
+    DeleteObjectCommand: vi
+      .fn()
+      .mockImplementation((input) => ({ _type: 'Delete', input })),
   };
 });
 
 vi.mock('@aws-sdk/s3-request-presigner', () => ({
   getSignedUrl: (...args: unknown[]) => mockGetSignedUrl(...args),
 }));
-
-import { uploadFile, deleteFile, getSignedDownloadUrl } from './r2.service.js';
 
 describe('r2 service', () => {
   beforeEach(() => {
@@ -29,7 +35,11 @@ describe('r2 service', () => {
     it('sends PutObjectCommand to S3', async () => {
       mockSend.mockResolvedValue({});
 
-      await uploadFile('test/key.pdf', Buffer.from('content'), 'application/pdf');
+      await uploadFile(
+        'test/key.pdf',
+        Buffer.from('content'),
+        'application/pdf',
+      );
       expect(mockSend).toHaveBeenCalledTimes(1);
     });
   });
