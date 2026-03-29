@@ -1,10 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
+const { mockMessagesCreate, mockMessagesStream } = vi.hoisted(() => ({
+  mockMessagesCreate: vi.fn().mockResolvedValue({
+    content: [{ type: 'text', text: 'Default Title' }],
+  }),
+  mockMessagesStream: vi.fn(),
+}));
+
 vi.mock('@anthropic-ai/sdk', () => ({
   default: vi.fn().mockImplementation(() => ({
     messages: {
-      create: vi.fn(),
-      stream: vi.fn(),
+      create: mockMessagesCreate,
+      stream: mockMessagesStream,
     },
   })),
 }));
@@ -12,6 +19,7 @@ vi.mock('@anthropic-ai/sdk', () => ({
 vi.mock('app/repositories/conversations/conversations.js', () => ({
   createConversation: vi.fn(),
   createMessage: vi.fn(),
+  updateConversationTitle: vi.fn(),
 }));
 
 vi.mock('app/services/embedding.service.js', () => ({
@@ -34,11 +42,10 @@ vi.mock('app/utils/logs/logger.js', () => ({
 }));
 
 import { ApiError } from 'app/utils/ApiError.js';
-import Anthropic from '@anthropic-ai/sdk';
 import * as convRepo from 'app/repositories/conversations/conversations.js';
 import * as embeddingService from 'app/services/embedding.service.js';
 import * as retrievalService from 'app/services/retrieval.service.js';
-import { streamQA } from './qa.js';
+import { streamQA, generateConversationTitle } from './qa.js';
 
 const mockConvRepo = vi.mocked(convRepo);
 const mockEmbedding = vi.mocked(embeddingService);
@@ -128,7 +135,6 @@ describe('qa handler', () => {
         'Content-Type': 'text/event-stream',
       }));
 
-      // Should send a "no documents" message
       const written = res._written.join('');
       expect(written).toContain("don't have any documents");
       expect(written).toContain('"type":"done"');
@@ -162,11 +168,9 @@ describe('qa handler', () => {
         },
       ]);
 
-      // Mock the Anthropic stream
       const mockStreamObj = {
         on: vi.fn().mockImplementation(function (this: any, event: string, cb: Function) {
           if (event === 'text') {
-            // Immediately invoke callback with some text
             cb('Answer text [1]');
           }
           return this;
@@ -176,12 +180,7 @@ describe('qa handler', () => {
         }),
       };
 
-      // Get the Anthropic instance and mock stream
-      const anthropicInstance = new (Anthropic as any)();
-      anthropicInstance.messages.stream.mockReturnValue(mockStreamObj);
-
-      // Re-import to get fresh module with mocked Anthropic
-      // Since the module-level `new Anthropic()` is already mocked, we can test directly
+      mockMessagesStream.mockReturnValue(mockStreamObj);
       const req = mockReq({ body: { question: 'What is in the doc?' } });
       const res = mockRes();
 
@@ -190,7 +189,6 @@ describe('qa handler', () => {
       expect(res.writeHead).toHaveBeenCalledWith(200, expect.objectContaining({
         'Content-Type': 'text/event-stream',
       }));
-      // Verify citations event was sent
       const written = res._written.join('');
       expect(written).toContain('"type":"citations"');
     });
@@ -217,9 +215,7 @@ describe('qa handler', () => {
 
       await streamQA(req, res);
 
-      // Should NOT create a new conversation
       expect(mockConvRepo.createConversation).not.toHaveBeenCalled();
-      // Should use the provided conversation_id
       expect(mockConvRepo.createMessage).toHaveBeenCalledWith(
         'existing-conv',
         'user',
@@ -291,9 +287,7 @@ describe('qa handler', () => {
         },
       ]);
 
-      // Mock Anthropic to throw a rate limit error
-      const anthropicInstance = new (Anthropic as any)();
-      anthropicInstance.messages.stream.mockImplementation(() => {
+      mockMessagesStream.mockImplementation(() => {
         throw new Error('Rate limit exceeded (429)');
       });
 
@@ -305,6 +299,116 @@ describe('qa handler', () => {
       const written = res._written.join('');
       expect(written).toContain('"type":"error"');
       expect(res._ended).toBe(true);
+    });
+  });
+
+  describe('generateConversationTitle', () => {
+    it('calls Anthropic with haiku model and returns generated title', async () => {
+      mockMessagesCreate.mockResolvedValueOnce({
+        content: [{ type: 'text', text: 'Understanding Machine Learning Basics' }],
+      });
+
+      const title = await generateConversationTitle('What is machine learning?');
+
+      expect(title).toBe('Understanding Machine Learning Basics');
+      expect(mockMessagesCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 30,
+        }),
+      );
+    });
+
+    it('falls back to truncated question when API call fails', async () => {
+      mockMessagesCreate.mockRejectedValueOnce(
+        new Error('API rate limit'),
+      );
+
+      const title = await generateConversationTitle('What is the meaning of life?');
+
+      expect(title).toBe('What is the meaning of life?');
+    });
+
+    it('falls back to truncated question when response has no text', async () => {
+      mockMessagesCreate.mockResolvedValueOnce({
+        content: [{ type: 'text', text: '' }],
+      });
+
+      const longQuestion = 'A'.repeat(150);
+      const title = await generateConversationTitle(longQuestion);
+
+      expect(title).toBe(longQuestion.slice(0, 100));
+    });
+  });
+
+  describe('title generation in streamQA', () => {
+    it('generates title only for new conversations (no conversation_id)', async () => {
+      mockMessagesCreate.mockResolvedValueOnce({
+        content: [{ type: 'text', text: 'Generated Title' }],
+      });
+
+      mockConvRepo.createConversation.mockResolvedValue({
+        id: 'conv-1',
+        user_id: 'user-1',
+        title: 'Test',
+        created_at: '',
+        updated_at: '',
+      });
+      mockConvRepo.createMessage.mockResolvedValue({
+        id: 'msg-1',
+        conversation_id: 'conv-1',
+        role: 'user',
+        content: 'test',
+        cited_chunk_ids: [],
+        created_at: '',
+      });
+      mockConvRepo.updateConversationTitle.mockResolvedValue(undefined);
+      mockEmbedding.generateEmbedding.mockResolvedValue([0.1]);
+      mockRetrieval.searchChunks.mockResolvedValue([]);
+
+      const req = mockReq({ body: { question: 'What is AI?' } });
+      const res = mockRes();
+
+      await streamQA(req, res);
+
+      // Wait for fire-and-forget promise to resolve
+      await new Promise((r) => setTimeout(r, 50));
+
+      expect(mockMessagesCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          model: 'claude-haiku-4-5-20251001',
+        }),
+      );
+      expect(mockConvRepo.updateConversationTitle).toHaveBeenCalledWith(
+        'conv-1',
+        'Generated Title',
+      );
+    });
+
+    it('does not generate title for existing conversations', async () => {
+      mockConvRepo.createMessage.mockResolvedValue({
+        id: 'msg-1',
+        conversation_id: 'existing-conv',
+        role: 'user',
+        content: 'test',
+        cited_chunk_ids: [],
+        created_at: '',
+      });
+      mockEmbedding.generateEmbedding.mockResolvedValue([0.1]);
+      mockRetrieval.searchChunks.mockResolvedValue([]);
+
+      const req = mockReq({
+        body: {
+          question: 'Follow up question',
+          conversation_id: 'existing-conv',
+        },
+      });
+      const res = mockRes();
+
+      await streamQA(req, res);
+      await new Promise((r) => setTimeout(r, 10));
+
+      expect(mockConvRepo.updateConversationTitle).not.toHaveBeenCalled();
     });
   });
 });

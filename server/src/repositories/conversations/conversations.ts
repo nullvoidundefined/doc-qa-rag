@@ -50,6 +50,17 @@ export async function createMessage(
   return row;
 }
 
+export async function updateConversationTitle(
+  conversationId: string,
+  title: string,
+): Promise<void> {
+  await query(
+    'UPDATE conversations SET title = $1, updated_at = NOW() WHERE id = $2',
+    [title, conversationId],
+  );
+}
+
+
 export async function getMessages(conversationId: string): Promise<Message[]> {
   const result = await query<Message>(
     'SELECT * FROM messages WHERE conversation_id = $1 ORDER BY created_at ASC',

@@ -22,6 +22,7 @@ import {
   listConversations,
   createMessage,
   getMessages,
+  updateConversationTitle,
 } from './conversations.js';
 
 describe('conversations repository', () => {
@@ -122,6 +123,18 @@ describe('conversations repository', () => {
       expect(mockQuery).toHaveBeenCalledWith(
         expect.stringContaining('cited_chunk_ids'),
         ['conv-1', 'assistant', 'AI is...', ['chunk-1', 'chunk-2']],
+      );
+    });
+  });
+
+  describe('updateConversationTitle', () => {
+    it('updates the title and updated_at for a conversation', async () => {
+      mockQuery.mockResolvedValue({ rows: [] });
+
+      await updateConversationTitle('conv-1', 'AI Document Questions');
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.stringContaining('UPDATE conversations SET title = $1'),
+        ['AI Document Questions', 'conv-1'],
       );
     });
   });

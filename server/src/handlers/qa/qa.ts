@@ -9,6 +9,32 @@ import type { Request, Response } from 'express';
 
 const anthropic = new Anthropic();
 
+
+export async function generateConversationTitle(
+  question: string,
+): Promise<string> {
+  try {
+    const response = await anthropic.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 30,
+      messages: [
+        {
+          role: 'user',
+          content: `Generate a 3-6 word title for a conversation that started with this question: ${question}. Reply with just the title, no quotes.`,
+        },
+      ],
+    });
+    const block = response.content[0];
+    if (block?.type === 'text' && block.text.trim().length > 0) {
+      return block.text.trim();
+    }
+    return question.slice(0, 100);
+  } catch (err) {
+    logger.warn({ err }, 'Title generation failed, using fallback');
+    return question.slice(0, 100);
+  }
+}
+
 export async function streamQA(req: Request, res: Response): Promise<void> {
   const user = req.user!;
   const { question, conversation_id, document_ids } = req.body as {
@@ -40,14 +66,26 @@ export async function streamQA(req: Request, res: Response): Promise<void> {
   try {
     // 1. Get or create conversation
     let conversationId = conversation_id;
+    let isNewConversation = false;
     if (!conversationId) {
       const title = question.slice(0, 100);
       const conversation = await convRepo.createConversation(user.id, title);
       conversationId = conversation.id;
+      isNewConversation = true;
     }
 
     // 2. Save user message
     await convRepo.createMessage(conversationId, 'user', question);
+
+    // 2b. Generate AI title for new conversations (fire-and-forget)
+    if (isNewConversation) {
+      const convId = conversationId;
+      generateConversationTitle(question).then((title) =>
+        convRepo.updateConversationTitle(convId, title),
+      ).catch((err) =>
+        logger.warn({ err }, 'Async title update failed'),
+      );
+    }
 
     // 3. Embed the question
     const questionEmbedding =
