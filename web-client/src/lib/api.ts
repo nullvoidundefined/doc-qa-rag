@@ -10,18 +10,43 @@ export class ApiError extends Error {
   }
 }
 
+let csrfToken: string | null = null;
+
+async function ensureCsrfToken(): Promise<string> {
+  if (csrfToken) return csrfToken;
+  const res = await fetch(`${API_BASE}/api/csrf-token`, {
+    credentials: 'include',
+  });
+  if (!res.ok) throw new ApiError(res.status, 'Failed to fetch CSRF token');
+  const data = await res.json();
+  csrfToken = data.token as string;
+  return csrfToken;
+}
+
+const STATE_CHANGING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const method = options.method ?? 'GET';
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
+    ...(options.headers as Record<string, string>),
+  };
+
+  if (STATE_CHANGING_METHODS.has(method)) {
+    headers['X-CSRF-Token'] = await ensureCsrfToken();
+  }
+
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Requested-With': 'XMLHttpRequest',
-      ...options.headers,
-    },
+    headers,
   });
 
   if (!res.ok) {
+    if (res.status === 403) {
+      csrfToken = null;
+    }
     const body = await res.json().catch(() => ({}));
     throw new ApiError(
       res.status,
@@ -48,29 +73,40 @@ export function del<T>(path: string): Promise<T> {
   return request<T>(path, { method: 'DELETE' });
 }
 
-export function uploadFile<T>(path: string, formData: FormData): Promise<T> {
-  return fetch(`${API_BASE}${path}`, {
+export async function uploadFile<T>(
+  path: string,
+  formData: FormData,
+): Promise<T> {
+  const token = await ensureCsrfToken();
+  const res = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
     credentials: 'include',
-    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+      'X-CSRF-Token': token,
+    },
     body: formData,
-  }).then(async (res) => {
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new ApiError(
-        res.status,
-        body?.error?.message ?? `Upload failed (${res.status})`,
-      );
-    }
-    return res.json();
   });
+
+  if (!res.ok) {
+    if (res.status === 403) {
+      csrfToken = null;
+    }
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(
+      res.status,
+      body?.error?.message ?? `Upload failed (${res.status})`,
+    );
+  }
+  return res.json();
 }
 
-export function streamPost(
+export async function streamPost(
   path: string,
   body: unknown,
-): ReadableStream<Uint8Array> | null {
+): Promise<ReadableStream<Uint8Array> | null> {
   const controller = new AbortController();
+  const token = await ensureCsrfToken();
 
   const responsePromise = fetch(`${API_BASE}${path}`, {
     method: 'POST',
@@ -78,6 +114,7 @@ export function streamPost(
     headers: {
       'Content-Type': 'application/json',
       'X-Requested-With': 'XMLHttpRequest',
+      'X-CSRF-Token': token,
     },
     body: JSON.stringify(body),
     signal: controller.signal,
