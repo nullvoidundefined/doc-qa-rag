@@ -5,8 +5,6 @@ import type { FormEvent } from 'react';
 
 import { useAuth } from '@/context/AuthContext';
 import { API_BASE } from '@/lib/api';
-import Link from 'next/link';
-
 import styles from './chat.module.scss';
 
 interface CitedChunk {
@@ -209,12 +207,6 @@ export default function ChatPage() {
         </a>
         <h1 className={styles.title}>Ask a Question</h1>
         <div className={styles.headerActions}>
-          <Link href='/docs/summary' className={styles.navLink}>
-            Summary
-          </Link>
-          <Link href='/docs/technical-overview' className={styles.navLink}>
-            Technical Overview
-          </Link>
           <button className={styles.logoutButton} onClick={() => logout()}>
             Log Out
           </button>

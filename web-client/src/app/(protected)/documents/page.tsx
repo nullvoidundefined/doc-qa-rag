@@ -5,8 +5,6 @@ import { useCallback, useRef, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { del, get, uploadFile } from '@/lib/api';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import Link from 'next/link';
-
 import styles from './documents.module.scss';
 
 interface Document {
@@ -107,12 +105,6 @@ export default function DocumentsPage() {
       <header className={styles.header}>
         <h1 className={styles.title}>Documents</h1>
         <div className={styles.headerActions}>
-          <Link href='/docs/summary' className={styles.navLink}>
-            Summary
-          </Link>
-          <Link href='/docs/technical-overview' className={styles.navLink}>
-            Technical Overview
-          </Link>
           <a href='/chat' className={styles.chatLink}>
             Ask a Question
           </a>
