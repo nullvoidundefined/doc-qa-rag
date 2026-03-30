@@ -78,8 +78,20 @@ export default function DocumentsPage() {
 
   const handleDelete = useCallback(
     async (id: string) => {
-      await del(`/documents/${id}`);
-      queryClient.invalidateQueries({ queryKey: ['documents'] });
+      const prev = queryClient.getQueryData<{ documents: Document[] }>([
+        'documents',
+      ]);
+      queryClient.setQueryData<{ documents: Document[] }>(
+        ['documents'],
+        (old) => ({
+          documents: (old?.documents ?? []).filter((d) => d.id !== id),
+        }),
+      );
+      try {
+        await del(`/documents/${id}`);
+      } catch {
+        queryClient.setQueryData(['documents'], prev);
+      }
     },
     [queryClient],
   );
