@@ -1,5 +1,5 @@
-import { ErrorBoundary } from '@/components/ErrorBoundary/ErrorBoundary';
 import DocBar from '@/components/DocBar/DocBar';
+import { ErrorBoundary } from '@/components/ErrorBoundary/ErrorBoundary';
 import { AuthProvider } from '@/context/AuthContext';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { Analytics } from '@vercel/analytics/next';
