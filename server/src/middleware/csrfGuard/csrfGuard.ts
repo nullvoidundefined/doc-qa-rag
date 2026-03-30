@@ -9,7 +9,7 @@ const { doubleCsrfProtection, generateCsrfToken } = doubleCsrf({
   cookieName: '__csrf',
   cookieOptions: {
     httpOnly: true,
-    sameSite: 'strict',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
     secure: process.env.NODE_ENV === 'production',
   },
 });
