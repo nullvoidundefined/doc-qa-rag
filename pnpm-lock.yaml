@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@bottomlessmargaritas/claude-architecture-prompts':
+        specifier: 3.0.0
+        version: 3.0.0
     devDependencies:
       '@babel/eslint-parser':
         specifier: ^7.28.6
@@ -636,6 +640,11 @@ packages:
   '@babel/types@7.29.0':
     resolution: {integrity: sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A==}
     engines: {node: '>=6.9.0'}
+
+  '@bottomlessmargaritas/claude-architecture-prompts@3.0.0':
+    resolution: {integrity: sha512-nm6uIXVhW4A+ulw9vVnV+Gzj9a163sqVHBtkGT4PTbJY7g5ECW9oXwDUj7maW2sFTvWE2ntZl0G/noy0bxKVHw==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   '@bottomlessmargaritas/doc-bar@1.0.1':
     resolution: {integrity: sha512-oRfAeUvMcaW292t62vg6IvPEiGZhflpOB6SAQcX2u1gdQ0l/D+Fy/lmonzZk59Df0jdsxOmIuywYOP8Qhjehrg==}
@@ -4905,6 +4914,8 @@ snapshots:
     dependencies:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
+
+  '@bottomlessmargaritas/claude-architecture-prompts@3.0.0': {}
 
   '@bottomlessmargaritas/doc-bar@1.0.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:

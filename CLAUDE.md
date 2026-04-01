@@ -21,3 +21,13 @@ Read `FULL_APPLICATION_SPEC.md` for full system design, DB schema, and task brea
 ## Build order
 
 POC → upload one PDF, process it, ask one question, get streaming answer with a citation → then pipeline robustness → then frontend polish.
+
+## Shared convention files
+
+Read the relevant file in `.claude/bottomlessmargaritas/` **before writing code** in that layer:
+
+- **Backend:** `.claude/bottomlessmargaritas/CLAUDE-BACKEND.md`
+- **Frontend:** `.claude/bottomlessmargaritas/CLAUDE-FRONTEND.md`
+- **Database:** `.claude/bottomlessmargaritas/CLAUDE-DATABASE.md`
+- **Styling:** `.claude/bottomlessmargaritas/CLAUDE-STYLING.md`
+- **Deployment:** `.claude/bottomlessmargaritas/CLOUD-DEPLOYMENT.md`

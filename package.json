@@ -31,5 +31,8 @@
     "lefthook": "^2.1.1",
     "prettier": "^3.8.1",
     "typescript-eslint": "^8.56.1"
+  },
+  "dependencies": {
+    "@bottomlessmargaritas/claude-architecture-prompts": "3.0.0"
   }
 }
