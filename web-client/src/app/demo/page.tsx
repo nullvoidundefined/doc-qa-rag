@@ -121,8 +121,11 @@ export default function DemoPage() {
           }),
         });
 
+        console.log('[PolicyPilot] QA response status:', response.status);
         if (!response.ok || !response.body) {
-          throw new Error('Failed to get response');
+          const errorBody = await response.text().catch(() => '');
+          console.error('[PolicyPilot] QA error body:', errorBody);
+          throw new Error(`Failed to get response (${response.status})`);
         }
 
         const reader = response.body.getReader();
@@ -154,6 +157,14 @@ export default function DemoPage() {
                 citations?: CitedChunk[];
                 message?: string;
               };
+
+              console.log(
+                '[PolicyPilot] SSE event:',
+                event.type,
+                event.type === 'citations'
+                  ? `(${event.citations?.length} citations)`
+                  : '',
+              );
 
               if (event.type === 'token') {
                 assistantContent += event.token;
