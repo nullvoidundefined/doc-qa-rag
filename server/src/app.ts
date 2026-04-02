@@ -12,6 +12,7 @@ import { rateLimiter } from 'app/middleware/rateLimiter/rateLimiter.js';
 import { requestLogger } from 'app/middleware/requestLogger/requestLogger.js';
 import { loadSession } from 'app/middleware/requireAuth/requireAuth.js';
 import { authRouter } from 'app/routes/auth.js';
+import { collectionRouter } from 'app/routes/collections.js';
 import { conversationRouter } from 'app/routes/conversations.js';
 import { documentRouter } from 'app/routes/documents.js';
 import { qaRouter } from 'app/routes/qa.js';
@@ -114,6 +115,7 @@ app.get('/health/ready', async (_req, res) => {
 });
 
 app.use('/auth', authRouter);
+app.use('/collections', collectionRouter);
 app.use('/documents', documentRouter);
 app.use('/qa', qaRouter);
 app.use('/conversations', conversationRouter);
