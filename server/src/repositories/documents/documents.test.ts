@@ -48,6 +48,7 @@ describe('documents repository', () => {
         'documents/user-1/abc/test.pdf',
         'application/pdf',
         1024,
+        'col-1',
       );
 
       expect(result).toEqual(mockDoc);
@@ -59,6 +60,7 @@ describe('documents repository', () => {
           'documents/user-1/abc/test.pdf',
           'application/pdf',
           1024,
+          'col-1',
         ],
         undefined,
       );
@@ -68,7 +70,14 @@ describe('documents repository', () => {
       mockQuery.mockResolvedValue({ rows: [] });
 
       await expect(
-        createDocument('user-1', 'test.pdf', 'key', 'application/pdf', 100),
+        createDocument(
+          'user-1',
+          'test.pdf',
+          'key',
+          'application/pdf',
+          100,
+          'col-1',
+        ),
       ).rejects.toThrow('Insert returned no row');
     });
   });

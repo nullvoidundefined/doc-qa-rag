@@ -12,9 +12,9 @@ interface ChunkRow {
 
 export async function searchChunks(
   embedding: number[],
-  userId: string,
+  userId: string | null,
   topK = 6,
-  documentIds?: string[],
+  collectionId?: string,
 ): Promise<CitedChunk[]> {
   const embeddingStr = `[${embedding.join(',')}]`;
 
@@ -23,19 +23,23 @@ export async function searchChunks(
            1 - (c.embedding <=> $1::vector) AS similarity
     FROM chunks c
     JOIN documents d ON d.id = c.document_id
-    WHERE c.user_id = $2
-      AND c.embedding IS NOT NULL
+    WHERE c.embedding IS NOT NULL
   `;
 
-  const values: unknown[] = [embeddingStr, userId];
+  const values: unknown[] = [embeddingStr];
 
-  if (documentIds && documentIds.length > 0) {
-    sql += ` AND c.document_id = ANY($3)`;
-    values.push(documentIds);
+  if (collectionId) {
+    values.push(collectionId);
+    sql += ` AND d.collection_id = $${values.length}`;
   }
 
-  sql += ` ORDER BY c.embedding <=> $1::vector LIMIT $${values.length + 1}`;
+  if (userId) {
+    values.push(userId);
+    sql += ` AND c.user_id = $${values.length}`;
+  }
+
   values.push(topK);
+  sql += ` ORDER BY c.embedding <=> $1::vector LIMIT $${values.length}`;
 
   const result = await query<ChunkRow>(sql, values);
 

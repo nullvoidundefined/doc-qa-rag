@@ -37,11 +37,11 @@ export async function generateConversationTitle(
 }
 
 export async function streamQA(req: Request, res: Response): Promise<void> {
-  const user = req.user!;
-  const { question, conversation_id, document_ids } = req.body as {
+  const user = req.user;
+  const { question, conversation_id, collection_id } = req.body as {
     question?: string;
     conversation_id?: string;
-    document_ids?: string[];
+    collection_id?: string;
   };
 
   // Pre-stream validation — throw ApiError (handled by global error handler)
@@ -51,6 +51,10 @@ export async function streamQA(req: Request, res: Response): Promise<void> {
     question.trim().length === 0
   ) {
     throw ApiError.badRequest('Question is required');
+  }
+
+  if (!collection_id) {
+    throw ApiError.badRequest('collection_id is required');
   }
 
   // Setup SSE
@@ -68,7 +72,7 @@ export async function streamQA(req: Request, res: Response): Promise<void> {
     // 1. Get or create conversation
     let conversationId = conversation_id;
     let isNewConversation = false;
-    if (!conversationId) {
+    if (!conversationId && user) {
       const title = question.slice(0, 100);
       const conversation = await convRepo.createConversation(user.id, title);
       conversationId = conversation.id;
@@ -76,10 +80,12 @@ export async function streamQA(req: Request, res: Response): Promise<void> {
     }
 
     // 2. Save user message
-    await convRepo.createMessage(conversationId, 'user', question);
+    if (conversationId) {
+      await convRepo.createMessage(conversationId, 'user', question);
+    }
 
     // 2b. Generate AI title for new conversations (fire-and-forget)
-    if (isNewConversation) {
+    if (isNewConversation && conversationId) {
       const convId = conversationId;
       generateConversationTitle(question)
         .then((title) => convRepo.updateConversationTitle(convId, title))
@@ -93,9 +99,9 @@ export async function streamQA(req: Request, res: Response): Promise<void> {
     // 4. Vector similarity search
     const chunks = await retrievalService.searchChunks(
       questionEmbedding,
-      user.id,
+      user?.id ?? null,
       6,
-      document_ids,
+      collection_id,
     );
 
     // 5. Send citations
@@ -110,13 +116,17 @@ export async function streamQA(req: Request, res: Response): Promise<void> {
         `data: ${JSON.stringify({ type: 'token', token: noContextMsg })}\n\n`,
       );
 
-      const assistantMsg = await convRepo.createMessage(
-        conversationId,
-        'assistant',
-        noContextMsg,
-      );
+      let messageId: string | undefined;
+      if (conversationId) {
+        const assistantMsg = await convRepo.createMessage(
+          conversationId,
+          'assistant',
+          noContextMsg,
+        );
+        messageId = assistantMsg.id;
+      }
       res.write(
-        `data: ${JSON.stringify({ type: 'done', conversation_id: conversationId, message_id: assistantMsg.id })}\n\n`,
+        `data: ${JSON.stringify({ type: 'done', conversation_id: conversationId ?? null, message_id: messageId ?? null })}\n\n`,
       );
       res.end();
       return;
@@ -150,18 +160,22 @@ export async function streamQA(req: Request, res: Response): Promise<void> {
     const citedChunkIds = [...new Set(citedIndices)].map((i) => chunks[i]!.id);
 
     // 8. Persist assistant message
-    const assistantMsg = await convRepo.createMessage(
-      conversationId,
-      'assistant',
-      fullText,
-      citedChunkIds,
-    );
+    let messageId: string | undefined;
+    if (conversationId) {
+      const assistantMsg = await convRepo.createMessage(
+        conversationId,
+        'assistant',
+        fullText,
+        citedChunkIds,
+      );
+      messageId = assistantMsg.id;
+    }
 
     logger.info(
       {
         event: 'qa_complete',
-        userId: user.id,
-        conversationId,
+        userId: user?.id ?? null,
+        conversationId: conversationId ?? null,
         chunksUsed: chunks.length,
         inputTokens: finalMessage.usage.input_tokens,
         outputTokens: finalMessage.usage.output_tokens,
@@ -170,7 +184,7 @@ export async function streamQA(req: Request, res: Response): Promise<void> {
     );
 
     res.write(
-      `data: ${JSON.stringify({ type: 'done', conversation_id: conversationId, message_id: assistantMsg.id })}\n\n`,
+      `data: ${JSON.stringify({ type: 'done', conversation_id: conversationId ?? null, message_id: messageId ?? null })}\n\n`,
     );
     res.end();
   } catch (err) {

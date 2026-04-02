@@ -56,7 +56,7 @@ describe('retrieval service', () => {
 
       await searchChunks(mockEmbedding, 'user-1');
       expect(mockQuery).toHaveBeenCalledWith(
-        expect.stringContaining('WHERE c.user_id = $2'),
+        expect.stringContaining('AND c.user_id = $2'),
         expect.arrayContaining(['user-1']),
       );
     });
@@ -81,22 +81,22 @@ describe('retrieval service', () => {
       expect(values).toContain(3);
     });
 
-    it('filters by document_ids when provided', async () => {
+    it('filters by collection_id when provided', async () => {
       mockQuery.mockResolvedValue({ rows: [] });
 
-      await searchChunks(mockEmbedding, 'user-1', 6, ['doc-1', 'doc-2']);
+      await searchChunks(mockEmbedding, 'user-1', 6, 'col-1');
       expect(mockQuery).toHaveBeenCalledWith(
-        expect.stringContaining('AND c.document_id = ANY($3)'),
-        expect.arrayContaining([['doc-1', 'doc-2']]),
+        expect.stringContaining('AND d.collection_id = $2'),
+        expect.arrayContaining(['col-1']),
       );
     });
 
-    it('does not add document_id filter when not provided', async () => {
+    it('does not add collection_id filter when not provided', async () => {
       mockQuery.mockResolvedValue({ rows: [] });
 
       await searchChunks(mockEmbedding, 'user-1');
       expect(mockQuery).toHaveBeenCalledWith(
-        expect.not.stringContaining('document_id = ANY'),
+        expect.not.stringContaining('collection_id'),
         expect.any(Array),
       );
     });

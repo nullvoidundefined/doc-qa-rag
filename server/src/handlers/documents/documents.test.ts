@@ -84,6 +84,7 @@ describe('documents handler', () => {
       mockQueue.add.mockResolvedValue({} as any);
 
       const req = mockReq({
+        body: { collection_id: 'col-1' },
         file: {
           originalname: 'test.pdf',
           mimetype: 'application/pdf',
@@ -102,6 +103,7 @@ describe('documents handler', () => {
         expect.objectContaining({
           documentId: 'doc-1',
           userId: 'user-1',
+          collectionId: 'col-1',
         }),
         expect.objectContaining({ attempts: 3 }),
       );
@@ -120,8 +122,27 @@ describe('documents handler', () => {
       });
     });
 
+    it('throws ApiError when collection_id is missing', async () => {
+      const req = mockReq({
+        file: {
+          originalname: 'test.pdf',
+          mimetype: 'application/pdf',
+          buffer: Buffer.from('pdf content'),
+          size: 1024,
+        },
+      });
+      const res = mockRes();
+
+      await expect(uploadDocument(req, res)).rejects.toThrow(ApiError);
+      await expect(uploadDocument(req, res)).rejects.toMatchObject({
+        statusCode: 400,
+        message: 'collection_id is required',
+      });
+    });
+
     it('rejects unsupported file types', async () => {
       const req = mockReq({
+        body: { collection_id: 'col-1' },
         file: {
           originalname: 'image.jpg',
           mimetype: 'image/jpeg',
@@ -140,6 +161,7 @@ describe('documents handler', () => {
 
     it('rejects files over 10MB', async () => {
       const req = mockReq({
+        body: { collection_id: 'col-1' },
         file: {
           originalname: 'big.pdf',
           mimetype: 'application/pdf',
@@ -162,6 +184,7 @@ describe('documents handler', () => {
       mockQueue.add.mockResolvedValue({} as any);
 
       const req = mockReq({
+        body: { collection_id: 'col-1' },
         file: {
           originalname: 'notes.txt',
           mimetype: 'text/plain',
@@ -182,6 +205,7 @@ describe('documents handler', () => {
       mockQueue.add.mockResolvedValue({} as any);
 
       const req = mockReq({
+        body: { collection_id: 'col-1' },
         file: {
           originalname: 'readme.md',
           mimetype: 'text/markdown',

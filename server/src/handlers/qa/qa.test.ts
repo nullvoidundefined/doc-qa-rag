@@ -98,12 +98,25 @@ describe('qa handler', () => {
     });
 
     it('throws ApiError.badRequest when question is empty string', async () => {
-      const req = mockReq({ body: { question: '   ' } });
+      const req = mockReq({
+        body: { question: '   ', collection_id: 'col-1' },
+      });
       const res = mockRes();
 
       await expect(streamQA(req, res)).rejects.toThrow(ApiError);
       await expect(streamQA(req, res)).rejects.toMatchObject({
         statusCode: 400,
+      });
+    });
+
+    it('throws ApiError.badRequest when collection_id is missing', async () => {
+      const req = mockReq({ body: { question: 'What is AI?' } });
+      const res = mockRes();
+
+      await expect(streamQA(req, res)).rejects.toThrow(ApiError);
+      await expect(streamQA(req, res)).rejects.toMatchObject({
+        statusCode: 400,
+        message: 'collection_id is required',
       });
     });
 
@@ -126,7 +139,9 @@ describe('qa handler', () => {
       mockEmbedding.generateEmbedding.mockResolvedValue([0.1, 0.2]);
       mockRetrieval.searchChunks.mockResolvedValue([]);
 
-      const req = mockReq({ body: { question: 'What is AI?' } });
+      const req = mockReq({
+        body: { question: 'What is AI?', collection_id: 'col-1' },
+      });
       const res = mockRes();
 
       await streamQA(req, res);
@@ -188,7 +203,9 @@ describe('qa handler', () => {
       };
 
       mockMessagesStream.mockReturnValue(mockStreamObj);
-      const req = mockReq({ body: { question: 'What is in the doc?' } });
+      const req = mockReq({
+        body: { question: 'What is in the doc?', collection_id: 'col-1' },
+      });
       const res = mockRes();
 
       await streamQA(req, res);
@@ -219,6 +236,7 @@ describe('qa handler', () => {
         body: {
           question: 'Follow up question',
           conversation_id: 'existing-conv',
+          collection_id: 'col-1',
         },
       });
       const res = mockRes();
@@ -233,7 +251,7 @@ describe('qa handler', () => {
       );
     });
 
-    it('passes document_ids to searchChunks when provided', async () => {
+    it('passes collection_id to searchChunks when provided', async () => {
       mockConvRepo.createConversation.mockResolvedValue({
         id: 'conv-1',
         user_id: 'user-1',
@@ -255,7 +273,7 @@ describe('qa handler', () => {
       const req = mockReq({
         body: {
           question: 'Scoped question',
-          document_ids: ['doc-1', 'doc-2'],
+          collection_id: 'col-1',
         },
       });
       const res = mockRes();
@@ -266,7 +284,7 @@ describe('qa handler', () => {
         expect.any(Array),
         'user-1',
         6,
-        ['doc-1', 'doc-2'],
+        'col-1',
       );
     });
 
@@ -301,7 +319,9 @@ describe('qa handler', () => {
         throw new Error('Rate limit exceeded (429)');
       });
 
-      const req = mockReq({ body: { question: 'test question' } });
+      const req = mockReq({
+        body: { question: 'test question', collection_id: 'col-1' },
+      });
       const res = mockRes();
 
       await streamQA(req, res);
@@ -380,7 +400,9 @@ describe('qa handler', () => {
       mockEmbedding.generateEmbedding.mockResolvedValue([0.1]);
       mockRetrieval.searchChunks.mockResolvedValue([]);
 
-      const req = mockReq({ body: { question: 'What is AI?' } });
+      const req = mockReq({
+        body: { question: 'What is AI?', collection_id: 'col-1' },
+      });
       const res = mockRes();
 
       await streamQA(req, res);
@@ -415,6 +437,7 @@ describe('qa handler', () => {
         body: {
           question: 'Follow up question',
           conversation_id: 'existing-conv',
+          collection_id: 'col-1',
         },
       });
       const res = mockRes();

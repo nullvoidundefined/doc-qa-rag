@@ -8,13 +8,14 @@ export async function createDocument(
   r2Key: string,
   mimeType: string,
   sizeBytes: number,
+  collectionId: string,
   client?: PoolClient,
 ): Promise<Document> {
   const result = await query<Document>(
-    `INSERT INTO documents (user_id, filename, r2_key, mime_type, size_bytes)
-     VALUES ($1, $2, $3, $4, $5)
+    `INSERT INTO documents (user_id, filename, r2_key, mime_type, size_bytes, collection_id)
+     VALUES ($1, $2, $3, $4, $5, $6)
      RETURNING *`,
-    [userId, filename, r2Key, mimeType, sizeBytes],
+    [userId, filename, r2Key, mimeType, sizeBytes, collectionId],
     client,
   );
   const row = result.rows[0];
@@ -33,7 +34,17 @@ export async function getDocumentById(
   return result.rows[0] ?? null;
 }
 
-export async function listDocuments(userId: string): Promise<Document[]> {
+export async function listDocuments(
+  userId: string,
+  collectionId?: string,
+): Promise<Document[]> {
+  if (collectionId) {
+    const result = await query<Document>(
+      'SELECT * FROM documents WHERE user_id = $1 AND collection_id = $2 ORDER BY created_at DESC',
+      [userId, collectionId],
+    );
+    return result.rows;
+  }
   const result = await query<Document>(
     'SELECT * FROM documents WHERE user_id = $1 ORDER BY created_at DESC',
     [userId],

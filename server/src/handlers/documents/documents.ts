@@ -12,9 +12,14 @@ export async function uploadDocument(
 ): Promise<void> {
   const user = req.user!;
   const file = req.file;
+  const collectionId = req.body?.collection_id as string | undefined;
 
   if (!file) {
     throw ApiError.badRequest('No file uploaded');
+  }
+
+  if (!collectionId) {
+    throw ApiError.badRequest('collection_id is required');
   }
 
   const allowedMimes = [
@@ -44,6 +49,7 @@ export async function uploadDocument(
     r2Key,
     file.mimetype,
     file.size,
+    collectionId,
   );
 
   const jobData: DocumentProcessJob = {
@@ -51,6 +57,7 @@ export async function uploadDocument(
     userId: user.id,
     r2Key,
     mimeType: file.mimetype,
+    collectionId,
   };
 
   await documentProcessQueue.add('process', jobData, {

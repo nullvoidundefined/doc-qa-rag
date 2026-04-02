@@ -125,4 +125,5 @@ export interface DocumentProcessJob {
   userId: string;
   r2Key: string;
   mimeType: string;
+  collectionId?: string;
 }

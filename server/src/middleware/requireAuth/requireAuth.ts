@@ -34,3 +34,11 @@ export function requireAuth(
   }
   next();
 }
+
+export function optionalAuth(
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+): void {
+  next();
+}
