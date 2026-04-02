@@ -43,6 +43,13 @@ export async function getDemoCollection(): Promise<Collection | null> {
   return result.rows[0] ?? null;
 }
 
+export async function getDemoCollections(): Promise<Collection[]> {
+  const result = await query<Collection>(
+    `SELECT * FROM collections WHERE is_demo = true ORDER BY name`,
+  );
+  return result.rows;
+}
+
 export async function deleteCollection(
   id: string,
   userId: string,

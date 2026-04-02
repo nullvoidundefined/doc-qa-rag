@@ -58,8 +58,18 @@ async function generateEmbeddings(texts: string[]): Promise<number[][]> {
 // Handbook content — representative text based on publicly known policies
 // ---------------------------------------------------------------------------
 
-const HANDBOOKS: Array<{ filename: string; content: string }> = [
+interface HandbookEntry {
+  collectionName: string;
+  collectionDescription: string;
+  filename: string;
+  content: string;
+}
+
+const HANDBOOKS: HandbookEntry[] = [
   {
+    collectionName: 'Valve Employee Handbook',
+    collectionDescription:
+      "Valve's famous flat-organization handbook. No managers, no org charts — everyone chooses what to work on. Desks have wheels.",
     filename: 'Valve Employee Handbook.txt',
     content: `VALVE EMPLOYEE HANDBOOK
 A Fearless Adventure in Knowing What to Do When No One's There Telling You What to Do
@@ -146,6 +156,9 @@ Working at Valve is not for everyone. The lack of structure can be paralyzing fo
 Welcome aboard. Now go find something to work on.`,
   },
   {
+    collectionName: 'GitLab Team Handbook',
+    collectionDescription:
+      "GitLab's remote-first, handbook-first culture. Built on CREDIT values: Collaboration, Results, Efficiency, Diversity, Iteration, Transparency.",
     filename: 'GitLab Team Handbook.txt',
     content: `GITLAB TEAM HANDBOOK
 Living Document — Company Culture and Operations
@@ -271,6 +284,9 @@ Anyone at GitLab can propose changes to this handbook via merge request. Changes
 This handbook belongs to all of us. Keep it accurate, keep it current, and keep it useful.`,
   },
   {
+    collectionName: 'Basecamp Employee Handbook',
+    collectionDescription:
+      "Basecamp's calm-company philosophy. 40-hour weeks, no goals, profit sharing, and the Shape Up methodology.",
     filename: 'Basecamp Employee Handbook.txt',
     content: `BASECAMP EMPLOYEE HANDBOOK
 How We Work and Why
@@ -432,54 +448,59 @@ async function seed() {
   // 0. Ensure demo user exists (documents/chunks require a non-null user_id)
   const demoUserId = await ensureDemoUser();
 
-  // 1. Get or create demo collection
-  let collectionId: string;
-  const existing = await pool.query(
-    `SELECT id FROM collections WHERE is_demo = true LIMIT 1`,
+  // 1. Clean up existing demo data (chunks → documents → collections)
+  console.log('Cleaning up existing demo data...');
+
+  const existingCollections = await pool.query(
+    `SELECT id FROM collections WHERE is_demo = true`,
+  );
+  const demoCollectionIds = existingCollections.rows.map(
+    (r: { id: string }) => r.id,
   );
 
-  if (existing.rows[0]) {
-    collectionId = existing.rows[0].id;
-    console.log(`Demo collection exists: ${collectionId}`);
-  } else {
-    const result = await pool.query(
-      `INSERT INTO collections (name, description, is_demo, user_id)
-             VALUES ($1, $2, true, NULL)
-             RETURNING id`,
-      [
-        'Sample Company Handbooks',
-        'Pre-loaded public company handbooks for demo purposes. Try asking questions about remote work policies, employee benefits, or company culture!',
-      ],
+  if (demoCollectionIds.length > 0) {
+    // Delete chunks for documents in demo collections
+    await pool.query(
+      `DELETE FROM chunks WHERE document_id IN (
+        SELECT id FROM documents WHERE collection_id = ANY($1)
+      )`,
+      [demoCollectionIds],
     );
-    collectionId = result.rows[0].id;
-    console.log(`Created demo collection: ${collectionId}`);
-  }
 
-  // 2. Check if collection already has documents
-  const docCount = await pool.query(
-    `SELECT count(*)::int AS cnt FROM documents WHERE collection_id = $1`,
-    [collectionId],
-  );
+    // Delete documents in demo collections
+    await pool.query(`DELETE FROM documents WHERE collection_id = ANY($1)`, [
+      demoCollectionIds,
+    ]);
 
-  if (docCount.rows[0].cnt > 0) {
+    // Delete demo collections
+    await pool.query(`DELETE FROM collections WHERE is_demo = true`);
+
     console.log(
-      `Demo collection already has ${docCount.rows[0].cnt} documents — skipping seed.`,
+      `  Removed ${demoCollectionIds.length} demo collection(s) and their data.`,
     );
-    await pool.end();
-    return;
   }
 
-  // 3. Seed each handbook
+  // 2. Create one collection per handbook and seed it
   let totalChunks = 0;
 
   for (const handbook of HANDBOOKS) {
-    console.log(`\nProcessing: ${handbook.filename}`);
+    console.log(`\nProcessing: ${handbook.collectionName}`);
 
-    // Insert document record (demo user owns it, r2_key placeholder)
+    // Create the collection
+    const colResult = await pool.query(
+      `INSERT INTO collections (name, description, is_demo, user_id)
+       VALUES ($1, $2, true, NULL)
+       RETURNING id`,
+      [handbook.collectionName, handbook.collectionDescription],
+    );
+    const collectionId = colResult.rows[0].id as string;
+    console.log(`  Created collection: ${collectionId}`);
+
+    // Insert document record
     const docResult = await pool.query(
       `INSERT INTO documents (user_id, filename, r2_key, mime_type, size_bytes, collection_id, status, total_chunks)
-             VALUES ($1, $2, $3, $4, $5, $6, 'ready', 0)
-             RETURNING id`,
+       VALUES ($1, $2, $3, $4, $5, $6, 'ready', 0)
+       RETURNING id`,
       [
         demoUserId,
         handbook.filename,
@@ -489,7 +510,7 @@ async function seed() {
         collectionId,
       ],
     );
-    const documentId = docResult.rows[0].id;
+    const documentId = docResult.rows[0].id as string;
     console.log(`  Created document: ${documentId}`);
 
     // Chunk the text
@@ -512,7 +533,7 @@ async function seed() {
 
       await pool.query(
         `INSERT INTO chunks (document_id, user_id, chunk_index, content, token_count, embedding)
-                 VALUES ($1, $2, $3, $4, $5, $6::vector)`,
+         VALUES ($1, $2, $3, $4, $5, $6::vector)`,
         [
           documentId,
           demoUserId,
@@ -535,7 +556,7 @@ async function seed() {
   }
 
   console.log(
-    `\nDone! Seeded ${HANDBOOKS.length} documents with ${totalChunks} total chunks.`,
+    `\nDone! Seeded ${HANDBOOKS.length} collections with ${totalChunks} total chunks.`,
   );
   await pool.end();
 }

@@ -7,12 +7,12 @@ const collectionRouter = express.Router();
 
 // Public route — no auth required
 collectionRouter.get('/demo', async (_req, res) => {
-  const demo = await collectionsRepo.getDemoCollection();
-  if (!demo) {
-    res.status(404).json({ error: 'No demo collection available' });
+  const collections = await collectionsRepo.getDemoCollections();
+  if (collections.length === 0) {
+    res.status(404).json({ error: 'No demo collections available' });
     return;
   }
-  res.json({ collection: demo });
+  res.json({ collections });
 });
 
 // Authenticated routes

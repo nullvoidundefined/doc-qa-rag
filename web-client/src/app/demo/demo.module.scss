@@ -92,6 +92,26 @@
   letter-spacing: -0.01em;
 }
 
+.collectionPicker {
+  padding: 7px 12px;
+  border: 2px solid $border;
+  border-radius: $radius-sm;
+  background: $cream;
+  color: $navy;
+  font-size: 13px;
+  font-family: var(--font-body), $font-body;
+  cursor: pointer;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+
+  &:focus {
+    border-color: $amber;
+    box-shadow: 0 0 0 3px rgba($amber, 0.15);
+  }
+}
+
 .headerActions {
   display: flex;
   align-items: center;

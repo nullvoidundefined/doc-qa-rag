@@ -27,6 +27,7 @@ interface Message {
 interface DemoCollection {
   id: string;
   name: string;
+  description: string | null;
 }
 
 export default function DemoPage() {
@@ -34,9 +35,9 @@ export default function DemoPage() {
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
   const [activeCitation, setActiveCitation] = useState<CitedChunk | null>(null);
-  const [demoCollection, setDemoCollection] = useState<DemoCollection | null>(
-    null,
-  );
+  const [demoCollections, setDemoCollections] = useState<DemoCollection[]>([]);
+  const [selectedCollection, setSelectedCollection] =
+    useState<DemoCollection | null>(null);
   const [loadError, setLoadError] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -44,23 +45,26 @@ export default function DemoPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
-  // Fetch demo collection on mount
+  // Fetch demo collections on mount
   useEffect(() => {
     fetch(`${API_BASE}/collections/demo`, { credentials: 'include' })
       .then((res) => {
         if (!res.ok) throw new Error('Demo not available');
         return res.json();
       })
-      .then((data: { collection: DemoCollection }) =>
-        setDemoCollection(data.collection),
-      )
-      .catch(() => setLoadError('Demo collection is currently unavailable.'));
+      .then((data: { collections: DemoCollection[] }) => {
+        setDemoCollections(data.collections);
+        if (data.collections.length > 0) {
+          setSelectedCollection(data.collections[0]!);
+        }
+      })
+      .catch(() => setLoadError('Demo collections are currently unavailable.'));
   }, []);
 
   const handleSubmit = useCallback(
     async (e: FormEvent) => {
       e.preventDefault();
-      if (!input.trim() || streaming || !demoCollection) return;
+      if (!input.trim() || streaming || !selectedCollection) return;
 
       const question = input.trim();
       setInput('');
@@ -89,7 +93,7 @@ export default function DemoPage() {
           },
           body: JSON.stringify({
             question,
-            collection_id: demoCollection.id,
+            collection_id: selectedCollection.id,
           }),
         });
 
@@ -190,7 +194,7 @@ export default function DemoPage() {
         scrollToBottom();
       }
     },
-    [input, streaming, demoCollection, scrollToBottom],
+    [input, streaming, selectedCollection, scrollToBottom],
   );
 
   const handleCitationClick = useCallback(
@@ -254,9 +258,27 @@ export default function DemoPage() {
         <Link href='/' className={styles.homeLink}>
           PolicyPilot
         </Link>
-        <h1 className={styles.title}>
-          Demo: {demoCollection?.name ?? 'Loading...'}
-        </h1>
+        <h1 className={styles.title}>Demo</h1>
+        {demoCollections.length > 1 && (
+          <select
+            className={styles.collectionPicker}
+            value={selectedCollection?.id ?? ''}
+            onChange={(e) => {
+              const col = demoCollections.find((c) => c.id === e.target.value);
+              if (col) {
+                setSelectedCollection(col);
+                setMessages([]);
+              }
+            }}
+            aria-label='Select a demo collection'
+          >
+            {demoCollections.map((col) => (
+              <option key={col.id} value={col.id}>
+                {col.name}
+              </option>
+            ))}
+          </select>
+        )}
         <div className={styles.headerActions}>
           <Link href='/login' className={styles.loginLink}>
             Sign In
@@ -334,12 +356,12 @@ export default function DemoPage() {
           aria-label='Ask a question about the demo handbook'
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          disabled={streaming || !demoCollection}
+          disabled={streaming || !selectedCollection}
         />
         <button
           className={styles.sendButton}
           type='submit'
-          disabled={streaming || !input.trim() || !demoCollection}
+          disabled={streaming || !input.trim() || !selectedCollection}
         >
           Send
         </button>
