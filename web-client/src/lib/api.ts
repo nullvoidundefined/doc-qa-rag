@@ -154,4 +154,18 @@ export async function streamPost(
   });
 }
 
+// ---- Collection API ----
+
+export function getCollections() {
+  return get<{ collections: any[] }>('/collections');
+}
+
+export function createCollectionApi(name: string, description?: string) {
+  return post<{ collection: any }>('/collections', { name, description });
+}
+
+export function deleteCollectionApi(id: string) {
+  return del<void>(`/collections/${id}`);
+}
+
 export { API_BASE };
