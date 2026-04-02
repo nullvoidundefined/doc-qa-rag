@@ -5,6 +5,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  issues: write
+  contents: read
+
 jobs:
   health-check:
     runs-on: ubuntu-latest
