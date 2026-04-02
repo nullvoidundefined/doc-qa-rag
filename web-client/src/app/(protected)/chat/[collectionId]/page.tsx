@@ -6,7 +6,7 @@ import type { FormEvent } from 'react';
 import Captain from '@/components/Captain/Captain';
 import CitationPanel from '@/components/CitationPanel/CitationPanel';
 import { useAuth } from '@/context/AuthContext';
-import { API_BASE, ensureCsrfToken, get } from '@/lib/api';
+import { API_BASE, get } from '@/lib/api';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
@@ -103,7 +103,11 @@ export default function CollectionChatPage() {
       let assistantContent = '';
 
       try {
-        const csrfToken = await ensureCsrfToken();
+        // Fetch fresh CSRF token for streaming request
+        const tokenRes = await fetch(`${API_BASE}/api/csrf-token`, {
+          credentials: 'include',
+        });
+        const { token: csrfToken } = await tokenRes.json();
 
         const response = await fetch(`${API_BASE}/qa`, {
           method: 'POST',
