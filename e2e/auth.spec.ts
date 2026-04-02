@@ -71,7 +71,7 @@ test.describe('Authentication', () => {
 
     // Find and click logout
     await page.click(
-      'button:has-text("Logout"), [aria-label="Logout"], a:has-text("Logout")',
+      'button:has-text("Log Out"), button:has-text("Logout"), [aria-label="Logout"]',
     );
     await expect(page).toHaveURL(/\/login/, { timeout: 10_000 });
   });
