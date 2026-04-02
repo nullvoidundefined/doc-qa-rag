@@ -397,24 +397,26 @@ export default function DemoPage() {
       </div>
 
       {/* Input Area */}
-      <form className={styles.inputArea} onSubmit={handleSubmit}>
-        <input
-          className={styles.chatInput}
-          type='text'
-          placeholder='Ask a question about the demo handbook...'
-          aria-label='Ask a question about the demo handbook'
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          disabled={streaming || !selectedCollection}
-        />
-        <button
-          className={styles.sendButton}
-          type='submit'
-          disabled={streaming || !input.trim() || !selectedCollection}
-        >
-          Send
-        </button>
-      </form>
+      <div className={styles.inputBar}>
+        <form className={styles.inputArea} onSubmit={handleSubmit}>
+          <input
+            className={styles.chatInput}
+            type='text'
+            placeholder='Ask a question about the demo handbook...'
+            aria-label='Ask a question about the demo handbook'
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            disabled={streaming || !selectedCollection}
+          />
+          <button
+            className={styles.sendButton}
+            type='submit'
+            disabled={streaming || !input.trim() || !selectedCollection}
+          >
+            Send
+          </button>
+        </form>
+      </div>
 
       {/* Citation Panel */}
       <CitationPanel
