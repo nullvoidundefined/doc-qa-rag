@@ -121,10 +121,7 @@ export default function DemoPage() {
           }),
         });
 
-        console.log('[PolicyPilot] QA response status:', response.status);
         if (!response.ok || !response.body) {
-          const errorBody = await response.text().catch(() => '');
-          console.error('[PolicyPilot] QA error body:', errorBody);
           throw new Error(`Failed to get response (${response.status})`);
         }
 
