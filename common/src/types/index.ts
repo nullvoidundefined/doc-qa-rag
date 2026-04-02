@@ -4,7 +4,8 @@ export type DocumentStatus =
   | 'chunking'
   | 'embedding'
   | 'ready'
-  | 'failed';
+  | 'failed'
+  | 'rejected';
 
 // Database row types
 export interface User {
