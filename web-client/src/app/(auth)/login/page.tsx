@@ -3,7 +3,9 @@
 import { useCallback, useState } from 'react';
 import type { FormEvent } from 'react';
 
+import Captain from '@/components/Captain/Captain';
 import { useAuth } from '@/context/AuthContext';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import styles from '../auth.module.scss';
@@ -23,7 +25,7 @@ export default function LoginPage() {
       setLoading(true);
       try {
         await login(email, password);
-        router.push('/documents');
+        router.push('/dashboard');
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Login failed');
       } finally {
@@ -35,38 +37,63 @@ export default function LoginPage() {
 
   return (
     <div className={styles.container}>
-      <form className={styles.form} onSubmit={handleSubmit}>
-        <h1 className={styles.heading}>Log In</h1>
-        {error && <p className={styles.error}>{error}</p>}
-        <input
-          className={styles.input}
-          type='email'
-          placeholder='Email'
-          aria-label='Email'
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          className={styles.input}
-          type='password'
-          placeholder='Password'
-          aria-label='Password'
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button
-          className={styles.submitButton}
-          type='submit'
-          disabled={loading}
-        >
-          {loading ? 'Logging in...' : 'Log In'}
-        </button>
-        <p className={styles.switchLink}>
-          Don&apos;t have an account? <a href='/register'>Sign up</a>
-        </p>
-      </form>
+      <div className={styles.card}>
+        <div className={styles.mascot}>
+          <Captain
+            pose='welcome'
+            size='md'
+            alt='Captain PolicyPilot welcomes you'
+          />
+        </div>
+        <h1 className={styles.heading}>Welcome aboard, co-pilot!</h1>
+        <p className={styles.subheading}>Sign in to access your flight plans</p>
+
+        <form className={styles.form} onSubmit={handleSubmit}>
+          {error && (
+            <p className={styles.error} role='alert'>
+              {error}
+            </p>
+          )}
+
+          <label className={styles.label}>
+            Email
+            <input
+              className={styles.input}
+              type='email'
+              placeholder='you@company.com'
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete='email'
+            />
+          </label>
+
+          <label className={styles.label}>
+            Password
+            <input
+              className={styles.input}
+              type='password'
+              placeholder='Your password'
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete='current-password'
+            />
+          </label>
+
+          <button
+            className={styles.submitButton}
+            type='submit'
+            disabled={loading}
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
+          </button>
+
+          <p className={styles.switchLink}>
+            New here? <Link href='/register'>Join the crew</Link>
+          </p>
+        </form>
+      </div>
     </div>
   );
 }

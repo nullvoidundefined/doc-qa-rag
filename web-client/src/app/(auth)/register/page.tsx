@@ -3,7 +3,9 @@
 import { useCallback, useState } from 'react';
 import type { FormEvent } from 'react';
 
+import Captain from '@/components/Captain/Captain';
 import { useAuth } from '@/context/AuthContext';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import styles from '../auth.module.scss';
@@ -25,7 +27,7 @@ export default function RegisterPage() {
       setLoading(true);
       try {
         await signup(email, password, firstName, lastName);
-        router.push('/documents');
+        router.push('/dashboard');
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Registration failed');
       } finally {
@@ -37,59 +39,91 @@ export default function RegisterPage() {
 
   return (
     <div className={styles.container}>
-      <form className={styles.form} onSubmit={handleSubmit}>
-        <h1 className={styles.heading}>Sign Up</h1>
-        {error && <p className={styles.error}>{error}</p>}
-        <div className={styles.row}>
-          <input
-            className={styles.input}
-            type='text'
-            placeholder='First name'
-            aria-label='First name'
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            required
-          />
-          <input
-            className={styles.input}
-            type='text'
-            placeholder='Last name'
-            aria-label='Last name'
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            required
+      <div className={styles.card}>
+        <div className={styles.mascot}>
+          <Captain
+            pose='welcome'
+            size='md'
+            alt='Captain PolicyPilot welcomes you'
           />
         </div>
-        <input
-          className={styles.input}
-          type='email'
-          placeholder='Email'
-          aria-label='Email'
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          className={styles.input}
-          type='password'
-          placeholder='Password (min 8 characters)'
-          aria-label='Password (min 8 characters)'
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          minLength={8}
-          required
-        />
-        <button
-          className={styles.submitButton}
-          type='submit'
-          disabled={loading}
-        >
-          {loading ? 'Creating account...' : 'Sign Up'}
-        </button>
-        <p className={styles.switchLink}>
-          Already have an account? <a href='/login'>Log in</a>
-        </p>
-      </form>
+        <h1 className={styles.heading}>Join the crew!</h1>
+        <p className={styles.subheading}>Create your account to get started</p>
+
+        <form className={styles.form} onSubmit={handleSubmit}>
+          {error && (
+            <p className={styles.error} role='alert'>
+              {error}
+            </p>
+          )}
+
+          <div className={styles.row}>
+            <label className={styles.label}>
+              First name
+              <input
+                className={styles.input}
+                type='text'
+                placeholder='First name'
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                required
+                autoComplete='given-name'
+              />
+            </label>
+            <label className={styles.label}>
+              Last name
+              <input
+                className={styles.input}
+                type='text'
+                placeholder='Last name'
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                required
+                autoComplete='family-name'
+              />
+            </label>
+          </div>
+
+          <label className={styles.label}>
+            Email
+            <input
+              className={styles.input}
+              type='email'
+              placeholder='you@company.com'
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete='email'
+            />
+          </label>
+
+          <label className={styles.label}>
+            Password
+            <input
+              className={styles.input}
+              type='password'
+              placeholder='Min 8 characters'
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              minLength={8}
+              required
+              autoComplete='new-password'
+            />
+          </label>
+
+          <button
+            className={styles.submitButton}
+            type='submit'
+            disabled={loading}
+          >
+            {loading ? 'Creating account...' : 'Create Account'}
+          </button>
+
+          <p className={styles.switchLink}>
+            Already have an account? <Link href='/login'>Sign in</Link>
+          </p>
+        </form>
+      </div>
     </div>
   );
 }
