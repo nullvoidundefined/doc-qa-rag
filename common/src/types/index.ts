@@ -59,6 +59,15 @@ export interface Message {
   created_at: string;
 }
 
+export interface Collection {
+  id: string;
+  user_id: string | null;
+  name: string;
+  description: string | null;
+  is_demo: boolean;
+  created_at: string;
+}
+
 // API types
 export interface DocumentUploadResponse {
   document: Document;
