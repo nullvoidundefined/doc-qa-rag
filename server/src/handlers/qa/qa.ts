@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { QA_SYSTEM_PROMPT, buildContextPrompt } from 'app/prompts/qa-system.js';
+import * as collectionsRepo from 'app/repositories/collections/collections.js';
 import * as convRepo from 'app/repositories/conversations/conversations.js';
 import * as embeddingService from 'app/services/embedding.service.js';
 import * as retrievalService from 'app/services/retrieval.service.js';
@@ -97,9 +98,24 @@ export async function streamQA(req: Request, res: Response): Promise<void> {
       await embeddingService.generateEmbedding(question);
 
     // 4. Vector similarity search
+    // For demo collections, don't filter by user_id (demo chunks belong to sentinel user)
+    // For demo collections, skip user_id filter (demo chunks belong to sentinel user)
+    let isDemoCollection = false;
+    if (user) {
+      const collection = await collectionsRepo.getCollectionById(
+        collection_id,
+        user.id,
+      );
+      isDemoCollection = collection?.is_demo ?? false;
+    } else {
+      // No auth = demo mode
+      isDemoCollection = true;
+    }
+    const searchUserId = isDemoCollection ? null : (user?.id ?? null);
+
     const chunks = await retrievalService.searchChunks(
       questionEmbedding,
-      user?.id ?? null,
+      searchUserId,
       6,
       collection_id,
     );
