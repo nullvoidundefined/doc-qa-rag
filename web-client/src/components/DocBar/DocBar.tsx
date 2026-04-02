@@ -10,7 +10,7 @@ export default function DocBar() {
       appName='Document Q&A RAG'
       position='top'
       fixed={false}
-      theme='dark'
+      theme='light'
     />
   );
 }
