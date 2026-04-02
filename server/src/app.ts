@@ -15,6 +15,7 @@ import { authRouter } from 'app/routes/auth.js';
 import { conversationRouter } from 'app/routes/conversations.js';
 import { documentRouter } from 'app/routes/documents.js';
 import { qaRouter } from 'app/routes/qa.js';
+import { checkConnection as checkR2 } from 'app/services/r2.service.js';
 import { logger } from 'app/utils/logs/logger.js';
 import cookieParser from 'cookie-parser';
 import express from 'express';
@@ -88,12 +89,28 @@ app.get('/health', (_req, res) => {
 });
 
 app.get('/health/ready', async (_req, res) => {
+  const checks: Record<string, string> = {};
+  let degraded = false;
+
   try {
     await query('SELECT 1');
-    res.status(200).json({ status: 'ok', db: 'connected' });
+    checks.db = 'connected';
   } catch {
-    res.status(503).json({ status: 'degraded', db: 'disconnected' });
+    checks.db = 'disconnected';
+    degraded = true;
   }
+
+  try {
+    await checkR2();
+    checks.r2 = 'connected';
+  } catch {
+    checks.r2 = 'disconnected';
+    degraded = true;
+  }
+
+  res
+    .status(degraded ? 503 : 200)
+    .json({ status: degraded ? 'degraded' : 'ok', ...checks });
 });
 
 app.use('/auth', authRouter);

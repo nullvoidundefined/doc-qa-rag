@@ -1,6 +1,7 @@
 import {
   DeleteObjectCommand,
   GetObjectCommand,
+  HeadBucketCommand,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
@@ -49,6 +50,10 @@ export async function downloadFile(key: string): Promise<Buffer> {
 
 export async function deleteFile(key: string): Promise<void> {
   await s3.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: key }));
+}
+
+export async function checkConnection(): Promise<void> {
+  await s3.send(new HeadBucketCommand({ Bucket: BUCKET }));
 }
 
 export async function getSignedDownloadUrl(

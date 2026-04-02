@@ -25,6 +25,16 @@ jobs:
           fi
           echo "Backend healthy"
 
+      - name: Check backend readiness (DB + R2)
+        run: |
+          BODY=$(curl -s "${{ vars.RAILWAY_URL }}/health/ready" --max-time 15)
+          STATUS=$(echo "$BODY" | jq -r '.status' 2>/dev/null)
+          if [ "$STATUS" != "ok" ]; then
+            echo "Readiness check failed: $BODY"
+            exit 1
+          fi
+          echo "Backend ready: $BODY"
+
       - name: Check CSRF endpoint
         run: |
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
