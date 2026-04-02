@@ -1,81 +1,433 @@
-.container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: 24px;
+@use 'sass:color';
+@use '../styles/variables' as *;
+
+// ────────────────────────────────────────
+// Shared
+// ────────────────────────────────────────
+
+.landing {
+  overflow-x: hidden;
 }
+
+.sectionInner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.sectionTitle {
+  font-family: var(--font-display), $font-display;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: $navy;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.sectionSubtitle {
+  font-size: 1.125rem;
+  color: $text-secondary;
+  text-align: center;
+  max-width: 620px;
+  margin: 0 auto 3rem;
+  line-height: 1.6;
+}
+
+// ────────────────────────────────────────
+// Buttons
+// ────────────────────────────────────────
+
+.btnPrimary,
+.btnSecondary {
+  display: inline-block;
+  padding: 14px 32px;
+  border-radius: $radius-md;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: var(--font-body), $font-body;
+  text-decoration: none;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: none;
+    transform: translateY(-2px);
+    box-shadow: $shadow-hover;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.btnPrimary {
+  background: $amber;
+  color: $white;
+  border: none;
+
+  &:hover {
+    background: color.adjust($amber, $lightness: -6%);
+  }
+}
+
+.btnSecondary {
+  background: transparent;
+  color: $navy;
+  border: 2px solid $navy;
+
+  &:hover {
+    background: rgba($navy, 0.06);
+  }
+}
+
+// ────────────────────────────────────────
+// Hero
+// ────────────────────────────────────────
 
 .hero {
+  position: relative;
+  background: linear-gradient(
+    170deg,
+    $cream 0%,
+    $ivory 55%,
+    color.adjust($amber-light, $lightness: 22%) 100%
+  );
+  padding: 5rem 1.5rem 6rem;
   text-align: center;
-  max-width: 600px;
+  overflow: hidden;
+
+  // Subtle retro texture via repeating radial dots
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, rgba($navy, 0.02) 1px, transparent 1px);
+    background-size: 24px 24px;
+    pointer-events: none;
+  }
 }
 
-.title {
-  font-size: 48px;
+.heroInner {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.heroBadge {
+  display: inline-block;
+  font-family: var(--font-display), $font-display;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: $amber;
+  border: 2px solid $amber;
+  border-radius: 100px;
+  padding: 6px 20px;
+  margin-bottom: 2rem;
+}
+
+.heroCaptain {
+  margin: 0 auto 2rem;
+}
+
+.heroTitle {
+  font-family: var(--font-display), $font-display;
+  font-size: 3.5rem;
   font-weight: 800;
-  letter-spacing: -0.03em;
+  color: $navy;
   line-height: 1.1;
-  margin-bottom: 16px;
+  margin-bottom: 1.25rem;
+  letter-spacing: -0.02em;
 }
 
-.subtitle {
-  font-size: 18px;
-  color: var(--foreground-muted);
-  line-height: 1.5;
-  margin-bottom: 32px;
+.heroTitleAccent {
+  color: $amber;
+  font-style: italic;
 }
 
-.actions {
+.heroSubtitle {
+  font-size: 1.2rem;
+  color: $text-secondary;
+  max-width: 520px;
+  margin: 0 auto 2.5rem;
+  line-height: 1.65;
+}
+
+.heroActions {
   display: flex;
-  gap: 12px;
+  gap: 1rem;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
-.primaryButton {
-  padding: 12px 28px;
-  border: none;
-  border-radius: 10px;
-  background: var(--accent);
-  color: #fff;
-  font-size: 15px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  transition: background 0.15s;
-  text-decoration: none;
-
-  &:hover {
-    background: var(--accent-hover);
-  }
+// Decorative stripe at bottom of hero
+.heroStripe {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: repeating-linear-gradient(
+    90deg,
+    $amber 0,
+    $amber 40px,
+    $navy 40px,
+    $navy 44px,
+    $coral 44px,
+    $coral 84px,
+    $navy 84px,
+    $navy 88px
+  );
 }
 
-.secondaryButton {
-  padding: 12px 28px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--background);
-  color: var(--foreground);
-  font-size: 15px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
+// ────────────────────────────────────────
+// Features
+// ────────────────────────────────────────
+
+.features {
+  background: $white;
+  padding: 5rem 0;
+  border-bottom: 1px solid $border;
+}
+
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.featureCard {
+  background: $bg-primary;
+  border: 1px solid $border;
+  border-radius: $radius-lg;
+  padding: 2.25rem 2rem;
+  text-align: center;
   transition:
-    background 0.15s,
-    border-color 0.15s;
-  text-decoration: none;
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 
   &:hover {
-    background: var(--surface-hover);
+    box-shadow: $shadow-hover;
+    transform: translateY(-4px);
   }
 }
 
-@media (max-width: 480px) {
-  .title {
-    font-size: 32px;
+.featureIcon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  line-height: 1;
+}
+
+.featureTitle {
+  font-family: var(--font-display), $font-display;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: $navy;
+  margin-bottom: 0.6rem;
+}
+
+.featureText {
+  font-size: 0.95rem;
+  color: $text-secondary;
+  line-height: 1.6;
+}
+
+// ────────────────────────────────────────
+// Demo Preview
+// ────────────────────────────────────────
+
+.demo {
+  background: $bg-secondary;
+  padding: 5rem 0;
+
+  // Retro top border
+  border-top: 4px solid $navy;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: repeating-linear-gradient(
+      90deg,
+      $navy 0,
+      $navy 20px,
+      transparent 20px,
+      transparent 24px
+    );
+  }
+}
+
+.demoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.demoCard {
+  display: flex;
+  flex-direction: column;
+  background: $white;
+  border: 2px solid $border;
+  border-radius: $radius-lg;
+  padding: 2rem;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+
+  &:hover {
+    border-color: $amber;
+    box-shadow: $shadow-hover;
+    transform: translateY(-4px);
+    text-decoration: none;
+
+    .demoCardCta {
+      color: $amber;
+    }
+  }
+}
+
+.demoCardLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: $amber;
+  margin-bottom: 0.5rem;
+}
+
+.demoCardTitle {
+  font-family: var(--font-display), $font-display;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $navy;
+  margin-bottom: 0.5rem;
+}
+
+.demoCardText {
+  font-size: 0.95rem;
+  color: $text-secondary;
+  line-height: 1.6;
+  flex: 1;
+}
+
+.demoCardCta {
+  display: inline-block;
+  margin-top: 1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: $navy;
+  transition: color 0.15s ease;
+}
+
+// ────────────────────────────────────────
+// CTA Footer
+// ────────────────────────────────────────
+
+.cta {
+  background: $navy;
+  padding: 5rem 1.5rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+
+  // Subtle retro dot texture
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle,
+      rgba($white, 0.04) 1px,
+      transparent 1px
+    );
+    background-size: 20px 20px;
+    pointer-events: none;
+  }
+}
+
+.ctaInner {
+  position: relative;
+  z-index: 1;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.ctaCaptain {
+  margin: 0 auto 1.5rem;
+}
+
+.ctaTitle {
+  font-family: var(--font-display), $font-display;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: $white;
+  margin-bottom: 0.75rem;
+}
+
+.ctaText {
+  font-size: 1.1rem;
+  color: rgba($white, 0.75);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+// ────────────────────────────────────────
+// Responsive
+// ────────────────────────────────────────
+
+@media (max-width: 900px) {
+  .featureGrid,
+  .demoGrid {
+    grid-template-columns: 1fr;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .heroTitle {
+    font-size: 2.5rem;
   }
 
-  .actions {
+  .heroSubtitle {
+    font-size: 1.05rem;
+  }
+
+  .sectionTitle {
+    font-size: 2rem;
+  }
+
+  .hero {
+    padding: 3.5rem 1rem 4rem;
+  }
+
+  .features,
+  .demo {
+    padding: 3.5rem 0;
+  }
+
+  .cta {
+    padding: 3.5rem 1rem;
+  }
+
+  .ctaTitle {
+    font-size: 2rem;
+  }
+
+  .heroActions {
     flex-direction: column;
+    align-items: center;
   }
 }
