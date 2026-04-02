@@ -128,13 +128,13 @@ export default function CollectionPage() {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'ready':
-        return 'Ready';
+        return 'Cleared for takeoff';
       case 'failed':
-        return 'Failed';
+        return 'Turbulence encountered';
       case 'rejected':
-        return 'Rejected';
+        return 'Redirected to another gate';
       default:
-        return 'Processing';
+        return 'Preparing for takeoff...';
     }
   };
 
@@ -160,7 +160,14 @@ export default function CollectionPage() {
   if (collectionLoading) {
     return (
       <div className={styles.page}>
-        <p className={styles.loading}>Loading collection...</p>
+        <div className={styles.loading}>
+          <Captain
+            pose='thinking'
+            size='sm'
+            alt='Captain PolicyPilot is thinking'
+          />
+          <span>Scanning the flight manual...</span>
+        </div>
       </div>
     );
   }
@@ -168,7 +175,16 @@ export default function CollectionPage() {
   if (!collection) {
     return (
       <div className={styles.page}>
-        <p className={styles.loading}>Collection not found.</p>
+        <div className={styles.emptyState}>
+          <Captain
+            pose='concerned'
+            size='md'
+            alt='Captain PolicyPilot looks concerned'
+          />
+          <p className={styles.emptyText}>
+            We&apos;ve hit some turbulence &mdash; collection not found.
+          </p>
+        </div>
       </div>
     );
   }
@@ -205,7 +221,7 @@ export default function CollectionPage() {
           disabled={uploading || collection.is_demo}
           aria-label='Upload a document'
         >
-          {uploading ? 'Uploading...' : 'Upload Document'}
+          {uploading ? 'Loading cargo...' : 'Upload Document'}
         </button>
         <button
           className={styles.chatButton}
@@ -220,7 +236,14 @@ export default function CollectionPage() {
       </div>
 
       {docsLoading ? (
-        <p className={styles.loading}>Loading documents...</p>
+        <div className={styles.loading}>
+          <Captain
+            pose='thinking'
+            size='sm'
+            alt='Captain PolicyPilot is thinking'
+          />
+          <span>Scanning the flight manual...</span>
+        </div>
       ) : documents.length === 0 ? (
         <div className={styles.emptyState}>
           <Captain
@@ -229,7 +252,7 @@ export default function CollectionPage() {
             alt='Captain PolicyPilot with clipboard'
           />
           <p className={styles.emptyText}>
-            No documents yet. Upload one to get started!
+            The hangar is empty &mdash; load your first document!
           </p>
         </div>
       ) : (

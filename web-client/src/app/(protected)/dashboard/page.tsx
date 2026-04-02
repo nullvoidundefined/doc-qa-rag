@@ -163,7 +163,7 @@ export default function DashboardPage() {
               type='submit'
               disabled={creating}
             >
-              {creating ? 'Creating...' : 'Create'}
+              {creating ? 'Filing flight plan...' : 'Create'}
             </button>
             <button
               className={styles.createCancel}
@@ -182,7 +182,14 @@ export default function DashboardPage() {
       )}
 
       {isLoading ? (
-        <p className={styles.loading}>Loading collections...</p>
+        <div className={styles.loading}>
+          <Captain
+            pose='thinking'
+            size='sm'
+            alt='Captain PolicyPilot is thinking'
+          />
+          <span>Scanning the flight manifest...</span>
+        </div>
       ) : collections.length === 0 ? (
         <div className={styles.emptyState}>
           <Captain

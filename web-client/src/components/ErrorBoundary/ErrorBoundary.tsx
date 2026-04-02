@@ -34,15 +34,16 @@ export class ErrorBoundary extends Component<Props, State> {
 
       return (
         <div className={styles.container}>
-          <h2 className={styles.heading}>Something went wrong</h2>
+          <h2 className={styles.heading}>We&apos;ve hit some turbulence</h2>
           <p className={styles.message}>
-            An unexpected error occurred. Please try reloading the page.
+            An unexpected error occurred mid-flight. Please try reloading the
+            page to get back on course.
           </p>
           <button
             className={styles.button}
             onClick={() => window.location.reload()}
           >
-            Reload page
+            Return to cruising altitude
           </button>
         </div>
       );

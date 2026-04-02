@@ -24,12 +24,14 @@ export default function ProtectedLayout({
       <div
         style={{
           display: 'flex',
+          flexDirection: 'column' as const,
           alignItems: 'center',
           justifyContent: 'center',
           minHeight: '100vh',
+          gap: '12px',
         }}
       >
-        <p>Loading...</p>
+        <p>Preparing for takeoff...</p>
       </div>
     );
   }
