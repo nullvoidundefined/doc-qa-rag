@@ -33,12 +33,12 @@ export default function RootLayout({
   return (
     <html lang='en'>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <DocBar />
         <QueryProvider>
           <AuthProvider>
             <ErrorBoundary>{children}</ErrorBoundary>
           </AuthProvider>
         </QueryProvider>
-        <DocBar />
         <Analytics />
         <SpeedInsights />
       </body>

@@ -8,7 +8,7 @@ export default function DocBar() {
   return (
     <AppDocBar
       appName='Document Q&A RAG'
-      position='bottom'
+      position='top'
       fixed={false}
       theme='dark'
     />
