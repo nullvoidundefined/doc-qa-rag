@@ -1,19 +1,17 @@
-:root {
-  --background: #ffffff;
-  --foreground: #222222;
-  --foreground-muted: #717171;
-  --border: #ebebeb;
-  --surface: #f7f7f7;
-  --surface-alt: #f0f0f0;
-  --surface-hover: #f0f0f0;
-  --surface-active: #e0e0e0;
-  --accent: #3b82f6;
-  --accent-hover: #2563eb;
-  --accent-light: #eff6ff;
-  --background-translucent: rgba(255, 255, 255, 0.92);
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --error: #ef4444;
+@use '../styles/variables' as *;
+
+// ---- Reset & Base ----
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 html,
@@ -23,31 +21,95 @@ body {
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  color: $text-primary;
+  background: $bg-primary;
+  font-family: var(--font-body), $font-body;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+// ---- Typography ----
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display), $font-display;
+  line-height: 1.25;
+  font-weight: 700;
 }
 
 a {
-  color: inherit;
+  color: $navy-light;
   text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
-/* ---- Markdown Documentation ---- */
+// ---- Button Reset ----
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+// ---- Utility Classes ----
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.card {
+  background: $bg-card;
+  border-radius: $radius-md;
+  box-shadow: $shadow-card;
+  border: 1px solid $border;
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: $shadow-hover;
+  }
+}
+
+.text-muted {
+  color: $text-muted;
+}
+
+.text-secondary {
+  color: $text-secondary;
+}
+
+// ---- Markdown Documentation ----
 
 .markdown-body {
   h1,
   h2,
   h3,
   h4 {
+    font-family: var(--font-display), $font-display;
     font-weight: 600;
     margin-top: 1.5rem;
     margin-bottom: 0.5rem;
@@ -59,7 +121,7 @@ a {
   }
   h2 {
     font-size: 1.3rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid $border;
     padding-bottom: 0.3rem;
   }
   h3 {
@@ -81,17 +143,17 @@ a {
   }
 
   code {
-    font-family: var(--font-geist-mono), monospace;
+    font-family: var(--font-mono), $font-mono;
     font-size: 0.85em;
-    background: var(--surface);
+    background: $bg-secondary;
     padding: 0.15em 0.4em;
     border-radius: 4px;
   }
 
   pre {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    background: $bg-secondary;
+    border: 1px solid $border;
+    border-radius: $radius-md;
     padding: 1rem;
     overflow-x: auto;
     margin-bottom: 1rem;
@@ -112,30 +174,30 @@ a {
   th,
   td {
     padding: 0.5rem 0.75rem;
-    border: 1px solid var(--border);
+    border: 1px solid $border;
     text-align: left;
   }
 
   th {
-    background: var(--surface);
+    background: $bg-secondary;
     font-weight: 600;
   }
 
   blockquote {
-    border-left: 3px solid var(--border);
+    border-left: 3px solid $amber;
     padding-left: 1rem;
-    color: var(--foreground-muted);
+    color: $text-secondary;
     margin-bottom: 0.85rem;
   }
 
   a {
-    color: var(--accent);
+    color: $navy-light;
     text-decoration: underline;
   }
 
   hr {
     border: none;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid $border;
     margin: 1.5rem 0;
   }
 }

@@ -1,26 +1,27 @@
-import DocBar from '@/components/DocBar/DocBar';
 import { ErrorBoundary } from '@/components/ErrorBoundary/ErrorBoundary';
 import { AuthProvider } from '@/context/AuthContext';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Inter, Playfair_Display } from 'next/font/google';
 
 import './globals.scss';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const playfair = Playfair_Display({
+  variable: '--font-display',
   subsets: ['latin'],
+  display: 'swap',
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const inter = Inter({
+  variable: '--font-body',
   subsets: ['latin'],
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: 'PolicyPilot — Ask your company handbook anything',
+  title: 'PolicyPilot \u2014 Ask your company handbook anything',
   description:
     'AI-powered employee policy assistant. Upload your company handbook and get instant, cited answers.',
 };
@@ -32,8 +33,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en'>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <DocBar />
+      <body className={`${playfair.variable} ${inter.variable}`}>
         <QueryProvider>
           <AuthProvider>
             <ErrorBoundary>{children}</ErrorBoundary>

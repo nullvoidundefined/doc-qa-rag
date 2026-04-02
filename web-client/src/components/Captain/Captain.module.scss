@@ -1,0 +1,19 @@
+.captain {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    object-fit: contain;
+  }
+}
+
+.sm {
+  max-width: 80px;
+}
+.md {
+  max-width: 160px;
+}
+.lg {
+  max-width: 320px;
+}
