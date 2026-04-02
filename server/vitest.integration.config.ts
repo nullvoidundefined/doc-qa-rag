@@ -2,12 +2,12 @@ import 'dotenv/config';
 import path from 'path';
 import { defineConfig } from 'vitest/config';
 
-// Disable Redis/BullMQ in integration tests — we test HTTP routes, not job processing
-process.env.REDIS_URL = '';
-// Disable SSL for CI Postgres (local Postgres doesn't support SSL)
-if (process.env.CI) {
-  process.env.DATABASE_SSL_REJECT_UNAUTHORIZED = 'false';
+// Set env BEFORE any imports that create DB connections
+// CI Postgres doesn't support SSL; Neon requires it
+if (!process.env.DATABASE_URL?.includes('neon.tech')) {
+  process.env.DATABASE_SSL_REJECT_UNAUTHORIZED = 'disable';
 }
+process.env.REDIS_URL = '';
 
 export default defineConfig({
   test: {
