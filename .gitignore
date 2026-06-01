@@ -13,5 +13,4 @@ playwright-report/
 
 # Claude Code local settings
 .claude/*
-!.claude/bottomlessmargaritas/
 .DS_Store
