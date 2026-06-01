@@ -62,17 +62,17 @@ src/
 
 ## File Naming
 
-| What               | Convention                      | Example                      |
-| ------------------ | ------------------------------- | ---------------------------- |
-| Components         | `PascalCase.tsx`                | `ChatBox.tsx`, `Header.tsx`  |
-| SCSS modules       | `PascalCase.module.scss`        | `ChatBox.module.scss`        |
-| Pages              | `page.tsx` (Next.js convention) | `app/dashboard/page.tsx`     |
-| Layouts            | `layout.tsx`                    | `app/(protected)/layout.tsx` |
-| Hooks              | `camelCase.ts`                  | `useAuth.ts`, `useToast.ts`  |
-| Utilities          | `camelCase.ts`                  | `api.ts`, `queryClient.ts`   |
-| Types              | `camelCase.ts`                  | `index.ts`                   |
-| Global styles      | `globals.scss`                  | `app/globals.scss`           |
-| Route-level styles | `camelCase.module.scss`         | `tripDetail.module.scss`     |
+| What | Convention | Example |
+|------|-----------|---------|
+| Components | `PascalCase.tsx` | `ChatBox.tsx`, `Header.tsx` |
+| SCSS modules | `PascalCase.module.scss` | `ChatBox.module.scss` |
+| Pages | `page.tsx` (Next.js convention) | `app/dashboard/page.tsx` |
+| Layouts | `layout.tsx` | `app/(protected)/layout.tsx` |
+| Hooks | `camelCase.ts` | `useAuth.ts`, `useToast.ts` |
+| Utilities | `camelCase.ts` | `api.ts`, `queryClient.ts` |
+| Types | `camelCase.ts` | `index.ts` |
+| Global styles | `globals.scss` | `app/globals.scss` |
+| Route-level styles | `camelCase.module.scss` | `tripDetail.module.scss` |
 
 ---
 
@@ -130,20 +130,22 @@ Imports are grouped with blank lines between groups, in this order:
 
 ```typescript
 // 1. React / Next.js
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+
+// 2. Third-party packages
+import { useQuery, useMutation } from '@tanstack/react-query';
 
 // 3. Local imports (@ alias paths)
 import { api } from '@/lib/api';
 import type { Trip } from '@/types';
-// 2. Third-party packages
-import { useMutation, useQuery } from '@tanstack/react-query';
-import type { Metadata } from 'next';
-import Link from 'next/link';
+
+// 4. Relative imports (sibling components, utils)
+import { formatDate } from './utils';
 
 // 5. Style imports (always last)
 import styles from './Component.module.scss';
-// 4. Relative imports (sibling components, utils)
-import { formatDate } from './utils';
 ```
 
 - Use `type` keyword for type-only imports: `import type { Foo } from '...'`
@@ -180,12 +182,10 @@ All API calls go through a typed fetch wrapper in `src/lib/api.ts`:
 
 ```typescript
 export const api = {
-  get: <T>(path: string) => apiFetch<T>(path),
-  post: <T>(path: string, json: unknown) =>
-    apiFetch<T>(path, { method: 'POST', json }),
-  patch: <T>(path: string, json: unknown) =>
-    apiFetch<T>(path, { method: 'PATCH', json }),
-  del: (path: string) => apiFetch(path, { method: 'DELETE' }),
+    get: <T>(path: string) => apiFetch<T>(path),
+    post: <T>(path: string, json: unknown) => apiFetch<T>(path, { method: 'POST', json }),
+    patch: <T>(path: string, json: unknown) => apiFetch<T>(path, { method: 'PATCH', json }),
+    del: (path: string) => apiFetch(path, { method: 'DELETE' }),
 };
 ```
 
@@ -215,8 +215,8 @@ export const api = {
 - Metadata exported from server components:
   ```typescript
   export const metadata: Metadata = {
-    title: 'App Name',
-    description: 'Description here',
+      title: 'App Name',
+      description: 'Description here',
   };
   ```
 - Font system via `next/font/google` with CSS variable injection
@@ -227,28 +227,28 @@ export const api = {
 
 ```json
 {
-  "singleQuote": true,
-  "jsxSingleQuote": false,
-  "semi": true,
-  "trailingComma": "all",
-  "tabWidth": 4,
-  "useTabs": false,
-  "printWidth": 100,
-  "arrowParens": "always",
-  "bracketSpacing": true
+    "singleQuote": true,
+    "jsxSingleQuote": false,
+    "semi": true,
+    "trailingComma": "all",
+    "tabWidth": 4,
+    "useTabs": false,
+    "printWidth": 100,
+    "arrowParens": "always",
+    "bracketSpacing": true
 }
 ```
 
-| Rule               | Value     | Example                 |
-| ------------------ | --------- | ----------------------- |
-| Quotes (JS/TS)     | Single    | `const x = 'hello';`    |
-| Quotes (JSX attrs) | Double    | `<div className="foo">` |
-| Semicolons         | Always    | `const x = 1;`          |
-| Trailing commas    | All       | `{ a: 1, b: 2, }`       |
-| Indentation        | 4 spaces  | —                       |
-| Line width         | 100 chars | —                       |
-| Arrow parens       | Always    | `(x) => x`              |
-| Bracket spacing    | Yes       | `{ x: 1 }` not `{x:1}`  |
+| Rule | Value | Example |
+|------|-------|---------|
+| Quotes (JS/TS) | Single | `const x = 'hello';` |
+| Quotes (JSX attrs) | Double | `<div className="foo">` |
+| Semicolons | Always | `const x = 1;` |
+| Trailing commas | All | `{ a: 1, b: 2, }` |
+| Indentation | 4 spaces | — |
+| Line width | 100 chars | — |
+| Arrow parens | Always | `(x) => x` |
+| Bracket spacing | Yes | `{ x: 1 }` not `{x:1}` |
 
 ---
 
@@ -289,7 +289,6 @@ describe('MyComponent', () => {
 Use **Radix UI primitives** for all interactive UI elements. Radix provides accessible, unstyled headless components. Style them with SCSS modules.
 
 **When to use Radix:**
-
 - Dropdowns, select menus, comboboxes → `@radix-ui/react-select`, `@radix-ui/react-dropdown-menu`
 - Dialogs, modals → `@radix-ui/react-dialog`
 - Toasts → `@radix-ui/react-toast`
@@ -298,42 +297,34 @@ Use **Radix UI primitives** for all interactive UI elements. Radix provides acce
 - Tabs → `@radix-ui/react-tabs`
 
 **How to style:**
-
 ```tsx
 import * as Select from '@radix-ui/react-select';
-
 import styles from './QuantitySelect.module.scss';
 
 export default function QuantitySelect({ value, onChange, min, max }: Props) {
-  return (
-    <Select.Root
-      value={String(value)}
-      onValueChange={(v) => onChange(Number(v))}
-    >
-      <Select.Trigger className={styles.trigger}>
-        <Select.Value />
-        <Select.Icon className={styles.icon} />
-      </Select.Trigger>
-      <Select.Portal>
-        <Select.Content className={styles.content}>
-          <Select.Viewport>
-            {Array.from({ length: max - min + 1 }, (_, i) => min + i).map(
-              (n) => (
-                <Select.Item key={n} value={String(n)} className={styles.item}>
-                  <Select.ItemText>{n}</Select.ItemText>
-                </Select.Item>
-              ),
-            )}
-          </Select.Viewport>
-        </Select.Content>
-      </Select.Portal>
-    </Select.Root>
-  );
+    return (
+        <Select.Root value={String(value)} onValueChange={(v) => onChange(Number(v))}>
+            <Select.Trigger className={styles.trigger}>
+                <Select.Value />
+                <Select.Icon className={styles.icon} />
+            </Select.Trigger>
+            <Select.Portal>
+                <Select.Content className={styles.content}>
+                    <Select.Viewport>
+                        {Array.from({ length: max - min + 1 }, (_, i) => min + i).map((n) => (
+                            <Select.Item key={n} value={String(n)} className={styles.item}>
+                                <Select.ItemText>{n}</Select.ItemText>
+                            </Select.Item>
+                        ))}
+                    </Select.Viewport>
+                </Select.Content>
+            </Select.Portal>
+        </Select.Root>
+    );
 }
 ```
 
 **Component library structure:**
-
 ```
 src/components/ui/
 ├── Button/Button.tsx + Button.module.scss

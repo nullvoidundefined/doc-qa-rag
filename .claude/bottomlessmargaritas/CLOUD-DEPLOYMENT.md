@@ -69,14 +69,14 @@ Railway Project (per app)
 
 ### Environment Variables — Required for Every Service
 
-| Variable         | Value                     | Notes                                                 |
-| ---------------- | ------------------------- | ----------------------------------------------------- |
-| `NODE_ENV`       | `production` or `staging` | **Always set. Never omit.**                           |
-| `PORT`           | Railway injects this      | Do not hardcode                                       |
-| `DATABASE_URL`   | Neon connection string    | Use pooled URL for the API, direct URL for migrations |
-| `REDIS_URL`      | Railway Redis URL         | Required for apps 3+                                  |
-| `GCP_PROJECT_ID` | `67254912843`             | Required for GCP Secret Manager integration           |
-| `GCP_SA_JSON`    | Service account JSON      | **Secret** — paste full JSON from GCP console         |
+| Variable | Value | Notes |
+|----------|-------|-------|
+| `NODE_ENV` | `production` or `staging` | **Always set. Never omit.** |
+| `PORT` | Railway injects this | Do not hardcode |
+| `DATABASE_URL` | Neon connection string | Use pooled URL for the API, direct URL for migrations |
+| `REDIS_URL` | Railway Redis URL | Required for apps 3+ |
+| `GCP_PROJECT_ID` | `67254912843` | Required for GCP Secret Manager integration |
+| `GCP_SA_JSON` | Service account JSON | **Secret** — paste full JSON from GCP console |
 
 Sensitive API keys (`ANTHROPIC_API_KEY`, `VOYAGE_API_KEY`, `SESSION_SECRET`, etc.) are **not** set as Railway env vars — they are fetched at startup from GCP Secret Manager. See [GCP Secret Manager](#gcp-secret-manager) below.
 
@@ -139,20 +139,19 @@ All sensitive API keys are stored in GCP Secret Manager (project `67254912843`) 
 
 ### Secrets Stored in GCP
 
-| Secret Name                       | Used By            |
-| --------------------------------- | ------------------ |
-| `ANTHROPIC_API_KEY`               | All apps           |
-| `SESSION_SECRET`                  | Apps 1, 2, 4, 6, 7 |
-| `VOYAGE_API_KEY`                  | App 7              |
-| `OPEN_AI_API_KEY`                 | Apps 4, 5          |
-| `CLOUDFLARE_R2_SECRET_ACCESS_KEY` | Apps 4, 7          |
-| `SERPAPI_API_KEY`                 | App 8              |
-| `GOOGLE_PLACES_API_KEY`           | App 8              |
+| Secret Name | Used By |
+|-------------|---------|
+| `ANTHROPIC_API_KEY` | All apps |
+| `SESSION_SECRET` | Apps 1, 2, 4, 6, 7 |
+| `VOYAGE_API_KEY` | App 7 |
+| `OPEN_AI_API_KEY` | Apps 4, 5 |
+| `CLOUDFLARE_R2_SECRET_ACCESS_KEY` | Apps 4, 7 |
+| `SERPAPI_API_KEY` | App 8 |
+| `GOOGLE_PLACES_API_KEY` | App 8 |
 
 ### How It Works
 
 Each service loads secrets at startup via `src/config/secrets.ts`:
-
 - In **development** (`NODE_ENV !== "production"`): skipped — use `.env` file values
 - In **production** without `GCP_SA_JSON`: logs a warning and falls back to Railway env vars
 - In **production** with `GCP_SA_JSON`: fetches all secrets from GCP before any app code initialises
@@ -177,7 +176,6 @@ gcloud iam service-accounts keys create ~/railway-sa.json \
 ```
 
 Then set on each Railway service:
-
 - `GCP_SA_JSON` = contents of `~/railway-sa.json`
 - `GCP_PROJECT_ID` = `67254912843`
 
@@ -219,15 +217,15 @@ export ANTHROPIC_API_KEY=$(gcloud secrets versions access latest \
 
 **The Vercel project name must exactly match the app directory name.** No exceptions.
 
-| App Directory               | Correct Vercel Project Name |
-| --------------------------- | --------------------------- |
-| `link-saver-ai-summarizer`  | `link-saver-ai-summarizer`  |
+| App Directory | Correct Vercel Project Name |
+|---------------|----------------------------|
+| `link-saver-ai-summarizer` | `link-saver-ai-summarizer` |
 | `async-ai-content-pipeline` | `async-ai-content-pipeline` |
-| `document-qa-rag`           | `document-qa-rag`           |
-| `multitenant-ai-assistant`  | `multitenant-ai-assistant`  |
+| `document-qa-rag` | `document-qa-rag` |
+| `multitenant-ai-assistant` | `multitenant-ai-assistant` |
 | `realtime-ai-collaboration` | `realtime-ai-collaboration` |
-| `ai-research-assistant`     | `ai-research-assistant`     |
-| `agentic-travel-agent`      | `agentic-travel-agent`      |
+| `ai-research-assistant` | `ai-research-assistant` |
+| `agentic-travel-agent` | `agentic-travel-agent` |
 
 If a project was created with a wrong name (e.g., `web-client`, `ai-content-pipeline`), rename it via the Vercel REST API:
 
@@ -269,13 +267,13 @@ All user-uploaded files and generated documents are stored in Cloudflare R2, not
 
 ### Required Variables (API service)
 
-| Variable                          | Notes                                                    |
-| --------------------------------- | -------------------------------------------------------- |
-| `CLOUDFLARE_ACCOUNT_ID`           | From Cloudflare dashboard                                |
-| `CLOUDFLARE_R2_BUCKET`            | Bucket name (e.g., `doc-qa-rag-prod`)                    |
-| `CLOUDFLARE_R2_ACCESS_KEY_ID`     | R2 API token — use separate tokens per environment       |
-| `CLOUDFLARE_R2_SECRET_ACCESS_KEY` | R2 API token secret                                      |
-| `CLOUDFLARE_R2_PUBLIC_URL`        | Public bucket URL or custom domain (if bucket is public) |
+| Variable | Notes |
+|----------|-------|
+| `CLOUDFLARE_ACCOUNT_ID` | From Cloudflare dashboard |
+| `CLOUDFLARE_R2_BUCKET` | Bucket name (e.g., `doc-qa-rag-prod`) |
+| `CLOUDFLARE_R2_ACCESS_KEY_ID` | R2 API token — use separate tokens per environment |
+| `CLOUDFLARE_R2_SECRET_ACCESS_KEY` | R2 API token secret |
+| `CLOUDFLARE_R2_PUBLIC_URL` | Public bucket URL or custom domain (if bucket is public) |
 
 ### Bucket Naming Convention
 
@@ -313,21 +311,21 @@ Before promoting a staging deploy to production:
 
 ## Common Mistakes
 
-| Mistake                                                                         | Fix                                                                                                                       |
-| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Vercel project name doesn't match app directory                                 | Rename via REST API: `PATCH /v9/projects/{id}` with `{"name": "correct-app-name"}`                                        |
-| Forgetting `NODE_ENV`                                                           | Always set it explicitly — never rely on a default                                                                        |
-| Using the same R2 bucket for staging and prod                                   | Use separate buckets per environment                                                                                      |
-| Running migrations from the worker                                              | Always run from the API service                                                                                           |
-| Hardcoding `PORT`                                                               | Use `process.env.PORT` — Railway injects it                                                                               |
-| Deploying without a healthcheck                                                 | Add `/health` and configure it in Railway before first production deploy                                                  |
-| Using the pooled DB URL for migrations                                          | Use the direct (non-pooled) URL for migrations only                                                                       |
-| Setting API keys as Railway env vars                                            | Put them in GCP Secret Manager; only `GCP_SA_JSON` and `GCP_PROJECT_ID` go in Railway                                     |
-| Forgetting `GCP_SA_JSON` after SA key rotation                                  | Download new key, update Railway var, restart service, delete old local key file                                          |
-| `rejectUnauthorized: false` in db pool                                          | Always use the env-var-controlled pattern — see Security Rules above. Never hardcode `false`.                             |
-| `CORS_ORIGIN` pointing to `localhost` in production                             | Set `CORS_ORIGIN` to the Vercel stable URL in Railway before first deploy                                                 |
-| `CORS_ORIGIN` containing a preview hash URL                                     | Use the team-scoped stable alias (`{project-name}-nullvoidundefineds-projects.vercel.app`), not a per-deployment hash URL |
-| `CORS_ORIGIN` missing `http://localhost:3000` when local frontend hits prod API | Include `http://localhost:3000` in Railway's `CORS_ORIGIN` (comma-separated) so local dev works against the deployed API  |
+| Mistake | Fix |
+|---------|-----|
+| Vercel project name doesn't match app directory | Rename via REST API: `PATCH /v9/projects/{id}` with `{"name": "correct-app-name"}` |
+| Forgetting `NODE_ENV` | Always set it explicitly — never rely on a default |
+| Using the same R2 bucket for staging and prod | Use separate buckets per environment |
+| Running migrations from the worker | Always run from the API service |
+| Hardcoding `PORT` | Use `process.env.PORT` — Railway injects it |
+| Deploying without a healthcheck | Add `/health` and configure it in Railway before first production deploy |
+| Using the pooled DB URL for migrations | Use the direct (non-pooled) URL for migrations only |
+| Setting API keys as Railway env vars | Put them in GCP Secret Manager; only `GCP_SA_JSON` and `GCP_PROJECT_ID` go in Railway |
+| Forgetting `GCP_SA_JSON` after SA key rotation | Download new key, update Railway var, restart service, delete old local key file |
+| `rejectUnauthorized: false` in db pool | Always use the env-var-controlled pattern — see Security Rules above. Never hardcode `false`. |
+| `CORS_ORIGIN` pointing to `localhost` in production | Set `CORS_ORIGIN` to the Vercel stable URL in Railway before first deploy |
+| `CORS_ORIGIN` containing a preview hash URL | Use the team-scoped stable alias (`{project-name}-nullvoidundefineds-projects.vercel.app`), not a per-deployment hash URL |
+| `CORS_ORIGIN` missing `http://localhost:3000` when local frontend hits prod API | Include `http://localhost:3000` in Railway's `CORS_ORIGIN` (comma-separated) so local dev works against the deployed API |
 
 ---
 
